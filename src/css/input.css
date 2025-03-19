@@ -1,0 +1,28 @@
+@import "tailwindcss";
+
+@theme {
+    --color-specialblue: #00B3FA;
+    --color-specialorange: #FA4700;
+    --font-display: "DM-Sans", "sans-serif";
+}
+
+@layer components {
+    .home-btn {
+        background-color: var(--color-blue-500);
+        color: var(--color-white);
+        padding: calc(var(--spacing) * 4);
+        border-radius: var(--radius-md);
+        &:hover {
+            background-color: var(--color-blue-300);
+        }
+    }
+    
+}
+
+@font-face {
+    font-family: DM-Sans;
+    font-style: normal;
+    font-weight: 100 1000; 
+    font-display: swap;
+    src: url("/fonts/DMSans-VariableFont_opsz,wght.ttf") format("ttf");
+}

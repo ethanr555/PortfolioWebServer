@@ -1,0 +1,11 @@
+# Ignore build files
+build/
+
+# Ignore templ-generated go files
+src/webserver/*_templ.go
+
+# Ignore vscode config
+.vscode/
+
+# Ignore log files
+*.log

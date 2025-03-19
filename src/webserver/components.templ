@@ -1,0 +1,225 @@
+package main
+
+import "fmt"
+
+type ImageInfo struct {
+    ImageLink string
+    ImageThumbnail string
+}
+
+type ComponentThumbnail struct {
+    Component templ.Component
+    Thumbnail string
+}
+
+templ comp_base(header templ.Component, content templ.Component) {
+    <!DOCTYPE html>
+	<head>
+		<link rel="stylesheet" href="/css/stylesheet.css" type="text/css">
+	</head>
+	<body>
+        @header
+        <div class="pl-40 pr-40 font-display">
+            @content
+        </div>
+	</body>
+}
+
+templ comp_header(firstname string, lastname string) {
+    <div class="flex bg-blue-500 align-middle justify-between pt-5 pb-5 pl-40 pr-40">
+        <h1 class="text-4xl text-white">{ firstname } { lastname }</h1>
+        <div class="inline-flex align-middle">
+            <a href="/" class="m-1 text-white text-2xl border-transparent border-b-2 box-border hover:border-b-white">Home</a>
+            <div class="border-l-4 ml-1 mr-1 border-white"></div>
+            <a href="/projects" class="m-1 text-white text-2xl border-transparent border-b-2 box-border hover:border-b-white">Projects</a>
+            <div class="border-l-4 ml-1 mr-1 border-white"></div>
+            <a href="/careers" class="m-1 text-white text-2xl border-transparent border-b-2 box-border hover:border-b-white">Career</a>
+            <div class="border-l-4 ml-1 mr-1 border-white"></div>
+            <a href="/education" class="m-1 text-white text-2xl border-transparent border-b-2 box-border hover:border-b-white">Education</a>
+        </div>
+    </div>
+}
+
+templ comp_home(biosnippet templ.Component, projects templ.Component, career templ.Component, education templ.Component) {
+    <div>
+        <div class="">
+        @biosnippet
+        </div>
+        <div class="">
+            <div class="grid grid-cols-2 grid-rows-[50px_auto_50px_auto_50px_auto_50px] gap-10 justify-between p-5 text-center grid-flow-col">
+                <h1 class=" text-2xl">Latest Projects</h1>
+                <div class="row-span-5">@projects</div>
+                <a href="/projects" class="home-btn"><b>See more</b></a>
+                <h1 class="text-2xl ">Latest Jobs</h1>
+                <div class="">@career</div>
+                <a href="/careers" class="home-btn"><b>See more</b></a>
+                <div class=""></div>
+                <h1 class="text-2xl ">Latest Degrees</h1>
+                <div class="">@education</div>
+                <a href="/education" class="home-btn"><b>See more</b></a>
+            </div>
+        </div>
+    </div>
+}
+
+templ comp_project(name string, CodeRepo string, Website string, CompanyName string, 
+                    Team string, Tools []string, Date string, Description string, 
+                    images []ImageInfo, videoids []string) {
+    <div class="">
+        <h1 class="text-3xl text-center p-10"><b>{name}</b></h1>
+        <div id="carousel">
+        </div>
+        // Grid for details and description
+        <div class="grid grid-cols-[25%_75%] grid-rows-1">
+            <div>
+                if Date != "" {
+                    <div>{ Date }</div>
+                }
+                if CodeRepo != "" {
+                    <div> Public Code Repository: { CodeRepo }</div>
+                }
+                if Website != "" {
+                    <div> Project Website: { Website }</div>
+                }
+                if CompanyName != "" {
+                    <div> Company: { CompanyName } </div>
+                }
+                if Team != "" {
+                    <div> Team: { Team } </div>
+                }
+                if len(Tools) > 0 {
+                    <div>
+                        <p>Tools: 
+                        for i := 0; i < len(Tools); i++ {
+                           { Tools[i] }
+                            if i + 1 < len(Tools) {
+                                { ", " }
+                            }
+                        }
+                        </p>
+                    </div>
+                }
+            </div>
+            <div>
+                <p>
+                    { Description }
+                </p>
+            </div>
+        </div>
+        if len(images) > 0 {
+            <noscript>
+                <h2 class="text-center text-2xl p-10">Images:</h2>
+                <div class="grid auto-rows-auto grid-cols-5">
+                    //WIP Image Gallery for NoScript/Javascript not supported browsers
+                    for _, image := range images {
+                        <a href={ templ.SafeURL(image.ImageLink) }><img src={ image.ImageThumbnail }></a>
+                    }
+
+                </div>
+            </noscript>
+        }
+        if len(images) > 0 || len(videoids) > 0 {
+            <script src="/js/carousel.js"></script>
+            @comp_carousel("carousel", images, videoids)
+        }
+    </div>
+}
+
+templ comp_career() {
+
+}
+
+templ comp_education() {
+
+}
+
+templ comp_biosnippet(description string) {
+    <div class="text-center self-center">
+        <h1 class="text-4xl pt-10 pb-10">Hello!</h1>
+
+        <p class="pb-10">
+            { description }
+        </p>
+    </div>
+}
+
+templ comp_summarysnippet_project(id string, Name string, Description string, ThumbnailLink string, charlimit int, largeimages bool) {
+    {{ ShortenedDesc := Description
+    if len(Description) > charlimit {
+        ShortenedDesc = Description[0:charlimit] + "..."
+    } }}
+    {{
+        // TailwindCSS can only read unbroken strings for utility classes. Having something like h-[%dvh] will
+        // cause the Tailwind compiler to skip it. Due to the use cases of this component, it was found to be
+        // easier and quicker just to have presets, as these can still be read my Tailwind when this file is being
+        // parsed.
+        var ImageSize string
+        if largeimages {
+           ImageSize = "h-50" 
+        } else {
+            ImageSize = "h-35"
+        }
+    }}
+    {{ url := fmt.Sprintf("/projects/%s", id)}}
+    //Had to create an extra div for the thumbnail in order to center the images origin. Super annoying but that's the trick.
+    <div class="text-left gap-1 flex items-center">
+        <div class={ "w-2/5 flex items-center overflow-hidden", ImageSize }>
+            if ThumbnailLink != ""{
+                <div class="h-1">
+                    <img class="mask-r-from-0% -translate-y-1/2" src={ ThumbnailLink }>
+                </div>
+            }
+        </div>
+        <div class="w-4/5 -ml-20 z-2 h-min">
+            <h2 class="text-1.5xl"><b><a href={ templ.URL(url) }>{Name}</a></b></h2>
+            <p> {ShortenedDesc}</p>
+        </div>
+    </div>
+}
+
+templ comp_summarysnippet_career(Title string, Date string, Description string, charlimit int) {
+    {{ ShortenedDesc := Description
+    if len(Description) > charlimit {
+        ShortenedDesc = Description[0:charlimit] + "..."
+    } }}
+    <div>
+        <div class="flex justify-between">
+            <h2 class="text-left">{ Title }</h2>
+            <h2 class="text-right">{ Date }</h2>
+        </div>
+        <p> { ShortenedDesc }</p>
+    </div>
+}
+
+templ comp_summarysnippet_education(Title string, Major string, Date string) {
+    <div class="flex justify-between">
+        <h2 class="text-left">{ Title }</h2>
+        <h3 class="text-right">{ Date }</h3>
+    </div>
+    <h2 class="text-left">{ Major }</h2>
+}
+
+templ comp_summaryverticalcontainer(comps []templ.Component) {
+   <div>
+        for _, comp := range comps {
+            <div class="shadow-2xl bg-white hover:bg-blue-400 hover:text-white m-1 p-2 rounded-md">
+                @comp
+            </div>
+        }
+   </div> 
+}
+
+templ comp_summarypage(pagename string, subtitle string, items []templ.Component, ) {
+    <div>
+        <h1 class="text-6xl text-center pt-10 pb-5">{ pagename }</h1>
+        <h2 class="text-2xl text-center pt-5 pb-10">{ subtitle}</h2>
+        @comp_summaryverticalcontainer(items)
+    </div>
+}
+
+//All Carousel logic is handled in carousel.js in ./js/carousel.js
+templ comp_carousel(htmlID string, images []ImageInfo, videoids []string) {
+    <script>
+        CreateCarousel({{htmlID}}, {{templ.JSONString(images)}},{{videoids}})
+    </script>
+}
