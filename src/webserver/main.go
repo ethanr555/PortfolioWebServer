@@ -93,16 +93,26 @@ func (app Application) educationPage(w http.ResponseWriter, r *http.Request) {
 func (app Application) projectSummariesPage(w http.ResponseWriter, r *http.Request) {
 
 	Bio := app.dl.FetchBio()
-	summaries := app.dl.FetchProjectSummaries(-1)
+	summaries := app.dl.FetchProjectSummariesExtra(-1)
 
 	//Finish
-	var items []templ.Component
-	for _, summary := range summaries {
+	var topitems []templ.Component
+	var botitems []templ.Component
+	var i int
+	var summary FetchProjectSummaryResult
+	for i, summary = range summaries {
+		if summary.IsCareer {
+			break
+		}
 		item := comp_summarysnippet_project(strconv.Itoa(summary.Id), summary.Name, summary.Description, summary.Thumbnaillink, 500, true)
-		items = append(items, item)
+		topitems = append(topitems, item)
+	}
+	for j := i; j < len(summaries); j++ {
+		item := comp_summarysnippet_project(strconv.Itoa(summaries[i].Id), summaries[j].Name, summaries[j].Description, summaries[j].Thumbnaillink, 500, true)
+		botitems = append(botitems, item)
 	}
 
-	content := comp_summarypage("Projects", "Click on any entry below for detailed information", items)
+	content := comp_summarypage_split("Projects", "Click on any entry below for detailed information", "Career Projects", topitems, botitems)
 	base := app.CreateBase(content, Bio)
 	base.Render(r.Context(), w)
 }

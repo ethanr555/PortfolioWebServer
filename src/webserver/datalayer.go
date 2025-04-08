@@ -76,6 +76,8 @@ type FetchProjectSummaryResult struct {
 	Name          string
 	Thumbnaillink string
 	Description   string
+	Endyear       int
+	IsCareer      bool
 }
 
 type FetchCareerSummariesResult struct {
@@ -377,6 +379,40 @@ func (dl *Datalayer) FetchProjectSummaries(limit int) []FetchProjectSummaryResul
 			Name:          resolveNil(name),
 			Thumbnaillink: resolveNil(thumbnaillink),
 			Description:   resolveNil(description),
+		}
+		results = append(results, result)
+		return nil
+	})
+
+	return results
+}
+func (dl *Datalayer) FetchProjectSummariesExtra(limit int) []FetchProjectSummaryResult {
+	var id *int
+	var name *string
+	var thumbnaillink *string
+	var description *string
+	var endyear *int
+	var iscareer *bool
+	query := getQueryFromPath("../sql/FetchProjectSummariesCareerFilter.sql")
+	var rows pgx.Rows
+	var err error
+	if limit <= -1 {
+		rows, err = dl.pool.Query(context.Background(), query, nil)
+	} else {
+		rows, err = dl.pool.Query(context.Background(), query, limit)
+	}
+	if err != nil {
+
+	}
+	var results []FetchProjectSummaryResult
+	pgx.ForEachRow(rows, []any{&id, &name, &thumbnaillink, &description, &endyear, &iscareer}, func() error {
+		result := FetchProjectSummaryResult{
+			Id:            resolveNil(id),
+			Name:          resolveNil(name),
+			Thumbnaillink: resolveNil(thumbnaillink),
+			Description:   resolveNil(description),
+			Endyear:       resolveNil(endyear),
+			IsCareer:      resolveNil(iscareer),
 		}
 		results = append(results, result)
 		return nil

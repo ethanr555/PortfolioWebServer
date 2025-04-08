@@ -210,10 +210,20 @@ templ comp_summaryverticalcontainer(comps []templ.Component) {
 }
 
 templ comp_summarypage(pagename string, subtitle string, items []templ.Component, ) {
-    <div>
+    <div class="pb-20">
         <h1 class="text-6xl text-center pt-10 pb-5">{ pagename }</h1>
         <h2 class="text-2xl text-center pt-5 pb-10">{ subtitle}</h2>
         @comp_summaryverticalcontainer(items)
+    </div>
+}
+
+templ comp_summarypage_split(pagename string, subtitle string, splittitle string, topitems []templ.Component, botitems []templ.Component) {
+    <div class="pb-20">
+        <h1 class="text-6xl text-center pt-10 pb-5">{ pagename }</h1>
+        <h2 class="text-2xl text-center pt-5 pb-10">{ subtitle}</h2>
+        @comp_summaryverticalcontainer(topitems)
+        <h2 class="text-4xl text-center pt-10 pb-10">{ splittitle }</h2>
+        @comp_summaryverticalcontainer(botitems)
     </div>
 }
 
