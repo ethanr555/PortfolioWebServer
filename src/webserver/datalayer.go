@@ -81,7 +81,7 @@ type FetchProjectSummaryResult struct {
 }
 
 type FetchCareerSummariesResult struct {
-	Id          int
+	Id          string
 	Title       string
 	Name        string
 	Description string
@@ -102,6 +102,7 @@ type FetchBiographyResult struct {
 	Linkedinlink string
 	Githublink   string
 	Websitelink  string
+	PortaitLink  string
 }
 
 func (dl *Datalayer) Init(path string, ip string, port string, databasename string, username string, password string) {
@@ -256,7 +257,7 @@ func (dl *Datalayer) FetchProjectTools(projectid string) []FetchProjectToolsResu
 	return results
 }
 
-func (dl *Datalayer) FetchCareer(careerid int) FetchCareerResult {
+func (dl *Datalayer) FetchCareer(careerid string) FetchCareerResult {
 
 	var id *int
 	var title *string
@@ -339,8 +340,9 @@ func (dl *Datalayer) FetchBio() FetchBiographyResult {
 	var linkedinlink *string
 	var githublink *string
 	var websitelink *string
+	var portraitlink *string
 	query := getQueryFromPath("../sql/FetchBiography.sql")
-	err := dl.pool.QueryRow(context.Background(), query).Scan(&firstname, &lastname, &description, &email, &linkedinlink, &githublink, &websitelink)
+	err := dl.pool.QueryRow(context.Background(), query).Scan(&firstname, &lastname, &description, &email, &linkedinlink, &githublink, &websitelink, &portraitlink)
 	if err != nil {
 		errMessQuery("FetchBio")
 	}
@@ -352,6 +354,7 @@ func (dl *Datalayer) FetchBio() FetchBiographyResult {
 		Linkedinlink: resolveNil(linkedinlink),
 		Githublink:   resolveNil(githublink),
 		Websitelink:  resolveNil(websitelink),
+		PortaitLink:  resolveNil(portraitlink),
 	}
 	return result
 }
@@ -423,7 +426,7 @@ func (dl *Datalayer) FetchProjectSummariesExtra(limit int) []FetchProjectSummary
 
 func (dl *Datalayer) FetchCareerSummaries(limit int) []FetchCareerSummariesResult {
 
-	var id *int
+	var id *string
 	var title *string
 	var name *string
 	var description *string

@@ -12,23 +12,31 @@ type ComponentThumbnail struct {
     Thumbnail string
 }
 
-templ comp_base(header templ.Component, content templ.Component) {
+templ comp_base(header templ.Component, content templ.Component, footer templ.Component) {
     <!DOCTYPE html>
 	<head>
 		<link rel="stylesheet" href="/css/stylesheet.css" type="text/css">
 	</head>
-	<body>
+	<body class="font-display">
+        <header class="">
         @header
-        <div class="pl-40 pr-40 font-display">
+        </header>
+        <div class="pl-40 pr-40 font-display shadow-2xl">
             @content
         </div>
+        <footer class="">
+        @footer
+        </footer>
 	</body>
 }
 
-templ comp_header(firstname string, lastname string) {
+templ comp_header(firstname string, lastname string, portraitlink string) {
     <div class="flex bg-blue-500 align-middle justify-between pt-5 pb-5 pl-40 pr-40">
-        <h1 class="text-4xl text-white">{ firstname } { lastname }</h1>
-        <div class="inline-flex align-middle">
+        <div class="inline-flex align-middle items-center">
+            <img src={ portraitlink } class="rounded-full h-15 w-15 mr-2 ">
+            <h1 class="text-4xl text-white">{ firstname } { lastname }</h1>
+        </div>
+        <div class="inline-flex align-middle items-center pt-1 pb-1">
             <a href="/" class="m-1 text-white text-2xl border-transparent border-b-2 box-border hover:border-b-white">Home</a>
             <div class="border-l-4 ml-1 mr-1 border-white"></div>
             <a href="/projects" class="m-1 text-white text-2xl border-transparent border-b-2 box-border hover:border-b-white">Projects</a>
@@ -125,8 +133,13 @@ templ comp_project(name string, CodeRepo string, Website string, CompanyName str
     </div>
 }
 
-templ comp_career() {
-
+templ comp_career(title string, companyname string, description string, date string) {
+    <div>
+        <h1> { title } </h1>
+        <h2> { companyname } </h2>
+        <p> { date } </p>
+        <p> { description } </p>
+    </div>
 }
 
 templ comp_education() {
@@ -177,14 +190,15 @@ templ comp_summarysnippet_project(id string, Name string, Description string, Th
     </div>
 }
 
-templ comp_summarysnippet_career(Title string, Date string, Description string, charlimit int) {
+templ comp_summarysnippet_career(ID string, Title string, Date string, Description string, charlimit int) {
     {{ ShortenedDesc := Description
     if len(Description) > charlimit {
         ShortenedDesc = Description[0:charlimit] + "..."
     } }}
+    {{ url := fmt.Sprintf("/career/%s", ID)}}
     <div>
         <div class="flex justify-between">
-            <h2 class="text-left">{ Title }</h2>
+            <a href={ templ.SafeURL(url)}><h2 class="text-left">{ Title }</h2></a>
             <h2 class="text-right">{ Date }</h2>
         </div>
         <p> { ShortenedDesc }</p>
@@ -232,4 +246,23 @@ templ comp_carousel(htmlID string, images []ImageInfo, videoids []string) {
     <script>
         CreateCarousel({{htmlID}}, {{templ.JSONString(images)}},{{videoids}})
     </script>
+}
+
+templ comp_footer(resumelink string, email string, linkedinlink string, githublink string) {
+    {{ emaillink := fmt.Sprintf("mailto:%s", email)}}
+    <div class="bg-blue-500 flex justify-between pl-40 pr-40 pt-10 pb-10">
+        <a href={ templ.SafeURL(resumelink) } class="bg-white text-blue-500 rounded-2xl p-10 text-center align-middle hover:bg-blue-300 hover:text-white" ><b>Download Resume</b> </a>
+        <div class="flex flex-col text-white text-right align-center content-center">
+            <h2><u><b>My socials:</b></u></h2>
+            <div class="flex-row">
+            Email: <a href={ templ.SafeURL(emaillink) }>Click Here</a>
+            </div>
+            <div class="flex-row">
+            LinkedIn: <a href={ templ.SafeURL(linkedinlink) }> Click Here</a>
+            </div>
+            <div class="flex-row">
+            Github: <a href={ templ.SafeURL(githublink)}>Click Here</a>
+            </div>
+        </div>
+    </div>
 }

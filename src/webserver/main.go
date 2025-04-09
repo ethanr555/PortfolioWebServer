@@ -15,8 +15,9 @@ type Application struct {
 }
 
 func (app Application) CreateBase(content templ.Component, bio FetchBiographyResult) templ.Component {
-	header := comp_header(bio.Firstname, bio.Lastname)
-	base := comp_base(header, content)
+	header := comp_header(bio.Firstname, bio.Lastname, bio.PortaitLink)
+	footer := comp_footer("", bio.Email, bio.Linkedinlink, bio.Githublink)
+	base := comp_base(header, content, footer)
 	return base
 }
 
@@ -37,7 +38,7 @@ func (app Application) home_page(w http.ResponseWriter, r *http.Request) {
 	}
 	var car_items []templ.Component
 	for _, item := range car_summaries {
-		car_items = append(car_items, comp_summarysnippet_career(item.Title, item.Name, item.Description, 200))
+		car_items = append(car_items, comp_summarysnippet_career(item.Id, item.Title, item.Name, item.Description, 200))
 	}
 	var edu_items []templ.Component
 	for _, item := range edu_summaries {
@@ -78,12 +79,17 @@ func (app Application) projectPage(w http.ResponseWriter, r *http.Request) {
 		"TODO", toolnames, fmt.Sprintf("%d - %d", project.Startyear, project.Endyear),
 		project.Description, images, videos)
 
-	base := comp_base(comp_header(Bio.Firstname, Bio.Lastname), content)
+	base := app.CreateBase(content, Bio)
 	base.Render(r.Context(), w)
 }
 
 func (app Application) careerPage(w http.ResponseWriter, r *http.Request) {
-
+	Bio := app.dl.FetchBio()
+	id := r.PathValue("id")
+	career := app.dl.FetchCareer(id)
+	page := comp_career(career.Title, career.Companyname, career.Description, fmt.Sprintf("%s %d - %s %d", career.Startmonth, career.Startyear, career.Endmonth, career.Endyear))
+	base := app.CreateBase(page, Bio)
+	base.Render(r.Context(), w)
 }
 
 func (app Application) educationPage(w http.ResponseWriter, r *http.Request) {
@@ -108,7 +114,7 @@ func (app Application) projectSummariesPage(w http.ResponseWriter, r *http.Reque
 		topitems = append(topitems, item)
 	}
 	for j := i; j < len(summaries); j++ {
-		item := comp_summarysnippet_project(strconv.Itoa(summaries[i].Id), summaries[j].Name, summaries[j].Description, summaries[j].Thumbnaillink, 500, true)
+		item := comp_summarysnippet_project(strconv.Itoa(summaries[j].Id), summaries[j].Name, summaries[j].Description, summaries[j].Thumbnaillink, 500, true)
 		botitems = append(botitems, item)
 	}
 
@@ -125,7 +131,7 @@ func (app Application) careerSummariesPage(w http.ResponseWriter, r *http.Reques
 	//Finish
 	var items []templ.Component
 	for _, summary := range summaries {
-		item := comp_summarysnippet_career(summary.Title, summary.Name, summary.Description, 500)
+		item := comp_summarysnippet_career(summary.Id, summary.Title, summary.Name, summary.Description, 500)
 		items = append(items, item)
 	}
 
@@ -172,7 +178,7 @@ func main() {
 	mux.HandleFunc("/careers", app.careerSummariesPage)
 	mux.HandleFunc("/education", app.educationSummariesPage)
 	mux.HandleFunc("/projects/{id}", app.projectPage)
-	//mux.HandleFunc("/careers/{id}", app.careerPage)
+	mux.HandleFunc("/career/{id}", app.careerPage)
 	//mux.HandleFunc("/education/{id}", app.educationPage)
 	fileServer := http.FileServer(http.Dir("../css/"))
 	fontServer := http.FileServer(http.Dir("../fonts/"))
