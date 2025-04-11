@@ -17,11 +17,11 @@ templ comp_base(header templ.Component, content templ.Component, footer templ.Co
 	<head>
 		<link rel="stylesheet" href="/css/stylesheet.css" type="text/css">
 	</head>
-	<body class="font-display">
+	<body class="font-display flex flex-col justify-between min-h-screen">
         <header class="">
         @header
         </header>
-        <div class="pl-40 pr-40 font-display shadow-2xl">
+        <div class="pl-40 pr-40 font-display shadow-2xl grow flex-1">
             @content
         </div>
         <footer class="">
@@ -38,11 +38,11 @@ templ comp_header(firstname string, lastname string, portraitlink string) {
         </div>
         <div class="inline-flex align-middle items-center pt-1 pb-1">
             <a href="/" class="m-1 text-white text-2xl border-transparent border-b-2 box-border hover:border-b-white">Home</a>
-            <div class="border-l-4 ml-1 mr-1 border-white"></div>
+            <div class="header-separator"></div>
             <a href="/projects" class="m-1 text-white text-2xl border-transparent border-b-2 box-border hover:border-b-white">Projects</a>
-            <div class="border-l-4 ml-1 mr-1 border-white"></div>
+            <div class="header-separator"></div>
             <a href="/careers" class="m-1 text-white text-2xl border-transparent border-b-2 box-border hover:border-b-white">Career</a>
-            <div class="border-l-4 ml-1 mr-1 border-white"></div>
+            <div class="header-separator"></div>
             <a href="/education" class="m-1 text-white text-2xl border-transparent border-b-2 box-border hover:border-b-white">Education</a>
         </div>
     </div>
@@ -134,9 +134,9 @@ templ comp_project(name string, CodeRepo string, Website string, CompanyName str
 }
 
 templ comp_career(title string, companyname string, description string, date string) {
-    <div>
-        <h1> { title } </h1>
-        <h2> { companyname } </h2>
+    <div class="pt-20 pb-20 text-center">
+        <h1 class="text-4xl"> { title } </h1>
+        <h2 class="text-2xl"> { companyname } </h2>
         <p> { date } </p>
         <p> { description } </p>
     </div>
@@ -253,15 +253,15 @@ templ comp_footer(resumelink string, email string, linkedinlink string, githubli
     <div class="bg-blue-500 flex justify-between pl-40 pr-40 pt-10 pb-10">
         <a href={ templ.SafeURL(resumelink) } class="bg-white text-blue-500 rounded-2xl p-10 text-center align-middle hover:bg-blue-300 hover:text-white" ><b>Download Resume</b> </a>
         <div class="flex flex-col text-white text-right align-center content-center">
-            <h2><u><b>My socials:</b></u></h2>
+            <h2><u><b>Socials:</b></u></h2>
             <div class="flex-row">
-            Email: <a href={ templ.SafeURL(emaillink) }>Click Here</a>
+            <a href={ templ.SafeURL(emaillink) } class="hover:underline">Email</a>
             </div>
             <div class="flex-row">
-            LinkedIn: <a href={ templ.SafeURL(linkedinlink) }> Click Here</a>
+            <a href={ templ.SafeURL(linkedinlink) } class="hover:underline"> LinkedIn</a>
             </div>
             <div class="flex-row">
-            Github: <a href={ templ.SafeURL(githublink)}>Click Here</a>
+            <a href={ templ.SafeURL(githublink)} class="hover:underline">Github</a>
             </div>
         </div>
     </div>

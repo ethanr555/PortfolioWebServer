@@ -16,7 +16,7 @@ type Application struct {
 
 func (app Application) CreateBase(content templ.Component, bio FetchBiographyResult) templ.Component {
 	header := comp_header(bio.Firstname, bio.Lastname, bio.PortaitLink)
-	footer := comp_footer("", bio.Email, bio.Linkedinlink, bio.Githublink)
+	footer := comp_footer(bio.ResumeLink, bio.Email, bio.Linkedinlink, bio.Githublink)
 	base := comp_base(header, content, footer)
 	return base
 }

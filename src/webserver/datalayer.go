@@ -103,6 +103,7 @@ type FetchBiographyResult struct {
 	Githublink   string
 	Websitelink  string
 	PortaitLink  string
+	ResumeLink   string
 }
 
 func (dl *Datalayer) Init(path string, ip string, port string, databasename string, username string, password string) {
@@ -341,8 +342,10 @@ func (dl *Datalayer) FetchBio() FetchBiographyResult {
 	var githublink *string
 	var websitelink *string
 	var portraitlink *string
+	var resumelink *string
 	query := getQueryFromPath("../sql/FetchBiography.sql")
-	err := dl.pool.QueryRow(context.Background(), query).Scan(&firstname, &lastname, &description, &email, &linkedinlink, &githublink, &websitelink, &portraitlink)
+	err := dl.pool.QueryRow(context.Background(), query).Scan(&firstname, &lastname, &description,
+		&email, &linkedinlink, &githublink, &websitelink, &portraitlink, &resumelink)
 	if err != nil {
 		errMessQuery("FetchBio")
 	}
@@ -355,6 +358,7 @@ func (dl *Datalayer) FetchBio() FetchBiographyResult {
 		Githublink:   resolveNil(githublink),
 		Websitelink:  resolveNil(websitelink),
 		PortaitLink:  resolveNil(portraitlink),
+		ResumeLink:   resolveNil(resumelink),
 	}
 	return result
 }
