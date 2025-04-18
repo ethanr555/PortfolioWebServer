@@ -10,7 +10,7 @@ buildtempl := $(templ:%.templ=%_templ.go)
 
 .PHONY: clean build run templ tailwindcss
 
-build: build/css/stylesheet.css build/bin/server ${buildtempl} ${buildsql} $(buildfonts) $(buildjs)
+build: build/css/stylesheet.css build/bin/server $(buildsql) $(buildfonts) $(buildjs) build/tls/cert.pem build/tls/key.pem
 
 clean:
 	rm -rf build/
@@ -25,16 +25,22 @@ templ:
 
 tailwindcss:
 	$(MAKE) build/css/stylesheet.css
+
+build/tls/cert.pem build/tls/key.pem: | build/bin/server
+	mkdir -p $$(dirname $@)	
+	cd build/tls/ && go run /usr/local/go/src/crypto/tls/generate_cert.go --rsa-bits=2048 --host=localhost
+
 # Generates Tailwindcss if html files have been updated or the input.css file was updated.
-build/css/stylesheet.css : ${buildtempl} src/css/input.css ${buildjs}
-	npx @tailwindcss/cli -i src/css/input.css -o build/css/stylesheet.css 
+build/css/stylesheet.css : $(buildtempl) src/css/input.css $(buildjs)
+	rm -f build/css/stylesheet.css
+	npx @tailwindcss/cli -m  -i src/css/input.css -o build/css/stylesheet.css 
 
 $(buildtempl):src/webserver/%_templ.go:src/webserver/%.templ
 	cd src/webserver && templ generate -f $*.templ
 
 # Generates built executable of webserver
 build/bin/server : $(go) $(buildtempl)
-	echo ${buildhtml}
+	echo $(buildhtml)
 	go build -C src/webserver/ -o ../../build/bin/server
 
 
