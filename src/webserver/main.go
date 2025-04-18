@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"time"
 
 	"github.com/a-h/templ"
 )
@@ -186,5 +187,19 @@ func main() {
 	mux.Handle("GET /css/", http.StripPrefix("/css", fileServer))
 	mux.Handle("GET /fonts/", http.StripPrefix("/fonts", fontServer))
 	mux.Handle("GET /js/", http.StripPrefix("/js", jsServer))
-	http.ListenAndServe(fmt.Sprintf(":%s", port), mux)
+	//http.ListenAndServe(fmt.Sprintf(":%s", port), mux)
+
+	server := &http.Server{
+		Addr:         fmt.Sprintf(":%s", port),
+		Handler:      mux,
+		IdleTimeout:  5 * time.Second,
+		ReadTimeout:  5 * time.Second,
+		WriteTimeout: 5 * time.Second,
+	}
+
+	err := server.ListenAndServe()
+
+	if err != nil {
+		fmt.Println(err.Error())
+	}
 }
