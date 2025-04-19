@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"time"
 
 	"github.com/a-h/templ"
 )
@@ -170,6 +171,8 @@ func main() {
 	if port == "" {
 		port = *flag.String("port", "4000", "Portfolio server port")
 	}
+	certpath := flag.String("cert", os.Getenv("PORTFOLIOSERVER_CERT"), "Portfolio Server Certification File")
+	keypath := flag.String("key", os.Getenv("PORTFOLIOSERVER_KEY"), "Portfolio Server Key File")
 	flag.Parse()
 	dl.Init("", *dbip, *dbport, *dbname, *dbuser, *dbpass)
 	app.dl = dl
@@ -186,5 +189,26 @@ func main() {
 	mux.Handle("GET /css/", http.StripPrefix("/css", fileServer))
 	mux.Handle("GET /fonts/", http.StripPrefix("/fonts", fontServer))
 	mux.Handle("GET /js/", http.StripPrefix("/js", jsServer))
-	http.ListenAndServe(fmt.Sprintf(":%s", port), mux)
+
+	server := &http.Server{
+		Addr:         fmt.Sprintf(":%s", port),
+		Handler:      mux,
+		IdleTimeout:  5 * time.Second,
+		ReadTimeout:  5 * time.Second,
+		WriteTimeout: 5 * time.Second,
+	}
+
+	// Able to run with or without TLS encryption, depending if the certificate files can be found.
+	var runerr error
+	if *certpath != "" && *keypath != "" {
+		fmt.Println("Running with tls certificate...")
+		runerr = server.ListenAndServeTLS(*certpath, *keypath)
+	} else {
+		fmt.Println("Running without tls certificate...")
+		runerr = server.ListenAndServe()
+	}
+
+	if runerr != nil {
+		fmt.Println(runerr.Error())
+	}
 }

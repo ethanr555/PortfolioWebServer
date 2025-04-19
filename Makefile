@@ -10,7 +10,7 @@ buildtempl := $(templ:%.templ=%_templ.go)
 
 .PHONY: clean build run templ tailwindcss
 
-build: build/css/stylesheet.css build/bin/server ${buildtempl} ${buildsql} $(buildfonts) $(buildjs)
+build: build/css/stylesheet.css build/bin/server $(buildsql) $(buildfonts) $(buildjs) build/tls/cert.pem build/tls/key.pem
 
 clean:
 	rm -rf build/
@@ -25,18 +25,29 @@ templ:
 
 tailwindcss:
 	$(MAKE) build/css/stylesheet.css
-# Generates Tailwindcss if html files have been updated or the input.css file was updated.
-build/css/stylesheet.css : ${buildtempl} src/css/input.css ${buildjs}
-	npx @tailwindcss/cli -i src/css/input.css -o build/css/stylesheet.css 
+
+# Generates self-signed certificates for build if none exist already. This presumes Go is installed in the location suggested by the official Go docs.
+# If certificates need to be renewed for testing, simply delete the files.
+# In production, use proper certificates signed by an authority rather than the ones generated here.
+build/tls/cert.pem build/tls/key.pem: | build/bin/server
+	mkdir -p $$(dirname $@)	
+	cd build/tls/ && go run /usr/local/go/src/crypto/tls/generate_cert.go --rsa-bits=2048 --host=localhost
+
+# Generates Tailwindcss if Templ HTML has been updated, if the the input.css file has been updated, or if the javascript files have been updated.
+# Any of these three files could result in new TailwindCSS utility classes being added.
+# Removes old stylesheet.css in the case that the prerequistes were updated but no new utility classes were called resulting in the stylesheet.css being skipped by the
+# TailwindCSS cli tool
+build/css/stylesheet.css : $(buildtempl) src/css/input.css $(buildjs)
+	rm -f build/css/stylesheet.css
+	npx @tailwindcss/cli -m  -i src/css/input.css -o build/css/stylesheet.css 
 
 $(buildtempl):src/webserver/%_templ.go:src/webserver/%.templ
 	cd src/webserver && templ generate -f $*.templ
 
 # Generates built executable of webserver
 build/bin/server : $(go) $(buildtempl)
-	echo ${buildhtml}
+	echo $(buildhtml)
 	go build -C src/webserver/ -o ../../build/bin/server
-
 
 # Copy any updated sql files
 $(buildsql):build/sql/% :src/sql/%
