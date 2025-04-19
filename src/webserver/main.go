@@ -198,6 +198,7 @@ func main() {
 		WriteTimeout: 5 * time.Second,
 	}
 
+	// Able to run with or without TLS encryption, depending if the certificate files can be found.
 	var runerr error
 	if *certpath != "" && *keypath != "" {
 		fmt.Println("Running with tls certificate...")
