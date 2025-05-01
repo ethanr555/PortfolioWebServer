@@ -15,13 +15,14 @@ type ComponentThumbnail struct {
 templ comp_base(header templ.Component, content templ.Component, footer templ.Component) {
     <!DOCTYPE html>
 	<head>
-		<link rel="stylesheet" href="/css/stylesheet.css" type="text/css">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0"> 
+        <link rel="stylesheet" href="/css/stylesheet.css" type="text/css">
 	</head>
-	<body class="font-display flex flex-col justify-between min-h-screen">
+	<body class="font-display flex flex-col justify-between min-h-screen lg:text-base">
         <header class="">
         @header
         </header>
-        <div class="pl-40 pr-40 font-display shadow-2xl grow flex-1">
+        <div class="pl-5 pr-5 lg:pl-40 lg:pr-40 font-display shadow-2xl grow flex-1">
             @content
         </div>
         <footer class="">
@@ -31,19 +32,19 @@ templ comp_base(header templ.Component, content templ.Component, footer templ.Co
 }
 
 templ comp_header(firstname string, lastname string, portraitlink string) {
-    <div class="flex bg-blue-500 align-middle justify-between pt-5 pb-5 pl-40 pr-40">
-        <div class="inline-flex align-middle items-center">
+    <div class="flex flex-col lg:flex-row bg-blue-500 items-center lg:items-start lg:align-middle lg:justify-between pt-5 pb-5 lg:pl-40 lg:pr-40 pl-5 pr-5">
+        <div class="flex flex-col lg:flex-row align-middle items-center">
             <img src={ portraitlink } class="rounded-full h-15 w-15 mr-2 ">
             <h1 class="text-4xl text-white">{ firstname } { lastname }</h1>
         </div>
-        <div class="inline-flex align-middle items-center pt-1 pb-1">
-            <a href="/" class="m-1 text-white text-2xl border-transparent border-b-2 box-border hover:border-b-white">Home</a>
+        <div class="text-white text-2xl inline-flex align-middle items-center pt-1 pb-1">
+            <a href="/" class="m-1 border-transparent border-b-2 box-border hover:border-b-white">Home</a>
             <div class="header-separator"></div>
-            <a href="/projects" class="m-1 text-white text-2xl border-transparent border-b-2 box-border hover:border-b-white">Projects</a>
+            <a href="/projects" class="m-1 border-transparent border-b-2 box-border hover:border-b-white">Projects</a>
             <div class="header-separator"></div>
-            <a href="/careers" class="m-1 text-white text-2xl border-transparent border-b-2 box-border hover:border-b-white">Career</a>
+            <a href="/careers" class="m-1 border-transparent border-b-2 box-border hover:border-b-white">Career</a>
             <div class="header-separator"></div>
-            <a href="/education" class="m-1 text-white text-2xl border-transparent border-b-2 box-border hover:border-b-white">Education</a>
+            <a href="/education" class="m-1 border-transparent border-b-2 box-border hover:border-b-white">Education</a>
         </div>
     </div>
 }
@@ -54,9 +55,9 @@ templ comp_home(biosnippet templ.Component, projects templ.Component, career tem
         @biosnippet
         </div>
         <div class="">
-            <div class="grid grid-cols-2 grid-rows-[50px_auto_50px_auto_50px_auto_50px] gap-10 justify-between p-5 text-center grid-flow-col">
-                <h1 class=" text-2xl">Latest Projects</h1>
-                <div class="row-span-5">@projects</div>
+            <div class="grid grid-cols-1 grid-rows-auto lg:grid-cols-2 lg:grid-rows-[50px_auto_50px_auto_50px_auto_50px] gap-10 justify-between p-5 text-center lg:grid-flow-col">
+                <h1 class="text-2xl">Latest Projects</h1>
+                <div class="lg:row-span-5">@projects</div>
                 <a href="/projects" class="home-btn"><b>See more</b></a>
                 <h1 class="text-2xl ">Latest Jobs</h1>
                 <div class="">@career</div>
@@ -168,22 +169,22 @@ templ comp_summarysnippet_project(id string, Name string, Description string, Th
         // parsed.
         var ImageSize string
         if largeimages {
-           ImageSize = "h-50" 
+           ImageSize = "min-h-20 h-2/5 lg:h-50"
         } else {
-            ImageSize = "h-35"
+            ImageSize = "min-h-20 h-2/5 lg:h-35"
         }
     }}
     {{ url := fmt.Sprintf("/projects/%s", id)}}
     //Had to create an extra div for the thumbnail in order to center the images origin. Super annoying but that's the trick.
-    <div class="text-left gap-1 flex items-center">
-        <div class={ "w-2/5 flex items-center overflow-hidden", ImageSize }>
+    <div class="text-left gap-1 flex items-center flex-col lg:flex-row overflow-hidden">
+        <div class={ "max-lg:mask-b-from-0% w-full lg:w-2/5 lg:h-1 flex items-center overflow-hidden", ImageSize }>
             if ThumbnailLink != ""{
-                <div class="h-1">
-                    <img class="mask-r-from-0% -translate-y-1/2" src={ ThumbnailLink }>
+                <div class=" w-full lg:h-1 ">
+                    <img class="max-lg:w-full max-lg:h-full object-cover lg:mask-r-from-0% translate-y-0 lg:-translate-y-1/2" src={ ThumbnailLink }>
                 </div>
             }
         </div>
-        <div class="w-4/5 -ml-20 z-2 h-min">
+        <div class="h-4/5 lg:w-4/5 -mt-20 lg:mt-0 lg:-ml-20 z-2 lg:h-min text-center lg:text-left">
             <h2 class="text-1.5xl"><b><a href={ templ.URL(url) }>{Name}</a></b></h2>
             <p> {ShortenedDesc}</p>
         </div>
@@ -250,7 +251,7 @@ templ comp_carousel(htmlID string, images []ImageInfo, videoids []string) {
 
 templ comp_footer(resumelink string, email string, linkedinlink string, githublink string) {
     {{ emaillink := fmt.Sprintf("mailto:%s", email)}}
-    <div class="bg-blue-500 flex justify-between pl-40 pr-40 pt-10 pb-10">
+    <div class="bg-blue-500 flex justify-between pl-5 pr-5 lg:pl-40 lg:pr-40 pt-10 pb-10">
         <a href={ templ.SafeURL(resumelink) } class="bg-white text-blue-500 rounded-2xl p-10 text-center align-middle hover:bg-blue-300 hover:text-white" ><b>Download Resume</b> </a>
         <div class="flex flex-col text-white text-right align-center content-center">
             <h2><u><b>Socials:</b></u></h2>
