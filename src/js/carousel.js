@@ -8,7 +8,7 @@ function CreateCarousel(id,images, videoids) {
     const tophalf = document.createElement('div')
     tophalf.className = "flex justify-center items-center"
     const gallery = document.createElement('div')
-    gallery.className = "min-h-100 min-w-150 overflow-hidden"
+    gallery.className = "min-h-[66vw] min-w-lvw lg:min-h-100 lg:min-w-150 overflow-hidden"
     const thumbnailselection = document.createElement('div')
     thumbnailselection.className = "flex h-50 min-w-50 overflow-x-scroll snap-mandatory snap-x"
     const thumbnailclass = "cursor-pointer m-2 snap-center"

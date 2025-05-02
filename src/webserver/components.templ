@@ -79,7 +79,7 @@ templ comp_project(name string, CodeRepo string, Website string, CompanyName str
         <div id="carousel">
         </div>
         // Grid for details and description
-        <div class="grid grid-cols-[25%_75%] grid-rows-1">
+        <div class="text-center lg:text-left lg:grid lg:grid-cols-[25%_75%] lg:grid-rows-1">
             <div>
                 if Date != "" {
                     <div>{ Date }</div>
@@ -226,7 +226,7 @@ templ comp_summaryverticalcontainer(comps []templ.Component) {
 
 templ comp_summarypage(pagename string, subtitle string, items []templ.Component, ) {
     <div class="pb-20">
-        <h1 class="text-6xl text-center pt-10 pb-5">{ pagename }</h1>
+        <h1 class=" text-4xl lg:text-6xl text-center pt-10 pb-5">{ pagename }</h1>
         <h2 class="text-2xl text-center pt-5 pb-10">{ subtitle}</h2>
         @comp_summaryverticalcontainer(items)
     </div>
@@ -234,7 +234,7 @@ templ comp_summarypage(pagename string, subtitle string, items []templ.Component
 
 templ comp_summarypage_split(pagename string, subtitle string, splittitle string, topitems []templ.Component, botitems []templ.Component) {
     <div class="pb-20">
-        <h1 class="text-6xl text-center pt-10 pb-5">{ pagename }</h1>
+        <h1 class="text-4xl lg:text-6xl text-center pt-10 pb-5">{ pagename }</h1>
         <h2 class="text-2xl text-center pt-5 pb-10">{ subtitle}</h2>
         @comp_summaryverticalcontainer(topitems)
         <h2 class="text-4xl text-center pt-10 pb-10">{ splittitle }</h2>
