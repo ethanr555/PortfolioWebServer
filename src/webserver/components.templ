@@ -34,18 +34,25 @@ templ comp_base(header templ.Component, content templ.Component, footer templ.Co
 templ comp_header(firstname string, lastname string, portraitlink string) {
     <div class="flex flex-col lg:flex-row bg-blue-500 items-center lg:items-start lg:align-middle lg:justify-between pt-5 pb-5 lg:pl-40 lg:pr-40 pl-5 pr-5">
         <div class="flex flex-col lg:flex-row align-middle items-center">
-            <img src={ portraitlink } class="rounded-full h-15 w-15 mr-2 ">
+            <img src={ portraitlink } class="rounded-full h-15 w-15 lg:mr-2 ">
             <h1 class="text-4xl text-white">{ firstname } { lastname }</h1>
         </div>
-        <div class="text-white text-2xl inline-flex align-middle items-center pt-1 pb-1">
-            <a href="/" class="m-1 border-transparent border-b-2 box-border hover:border-b-white">Home</a>
-            <div class="header-separator"></div>
-            <a href="/projects" class="m-1 border-transparent border-b-2 box-border hover:border-b-white">Projects</a>
-            <div class="header-separator"></div>
-            <a href="/careers" class="m-1 border-transparent border-b-2 box-border hover:border-b-white">Career</a>
-            <div class="header-separator"></div>
-            <a href="/education" class="m-1 border-transparent border-b-2 box-border hover:border-b-white">Education</a>
-        </div>
+        <nav class="text-white text-2xl inline-flex align-middle items-center pt-1 pb-1">
+            <div class="hidden lg:inline-flex">
+                <a href="/" class="m-1 border-transparent border-b-2 box-border hover:underline hover:underline-offset-2 hover:decoration-2">Home</a>
+                <div class="header-separator"></div>
+                <a href="/projects" class="m-1 border-transparent border-b-2 box-border hover:underline hover:underline-offset-2 hover:decoration-2">Projects</a>
+                <div class="header-separator"></div>
+                <a href="/careers" class="m-1 border-transparent border-b-2 box-border hover:underline hover:underline-offset-2 hover:decoration-2">Career</a>
+                <div class="header-separator"></div>
+                <a href="/education" class="m-1 border-transparent border-b-2 box-border hover:underline hover:underline-offset-2 hover:decoration-2">Education</a>
+            </div>
+            <noscript>
+                <div class="lg:hidden h-auto w-10">
+                    <a href={"/menu"} class=""><img src="/icons/hamburgermenuicon.svg" alt="Menu" class="border-transparent border-b-2 box-border hover:underline hover:underline-offset-2 hover:decoration-2"></a>
+                </div>
+            </noscript>
+        </nav>
     </div>
 }
 
@@ -265,5 +272,14 @@ templ comp_footer(resumelink string, email string, linkedinlink string, githubli
             <a href={ templ.SafeURL(githublink)} class="hover:underline">Github</a>
             </div>
         </div>
+    </div>
+}
+
+templ comp_categories() {
+    <div>
+        <a href={ templ.SafeURL("/")}>Home</a>
+        <a href={ templ.SafeURL("/projects")}>Projects</a>
+        <a href={ templ.SafeURL("/careers")}>Career</a>
+        <a href={ templ.SafeURL("/education")}>Education</a>
     </div>
 }
