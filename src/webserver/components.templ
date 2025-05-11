@@ -47,6 +47,8 @@ templ comp_header(firstname string, lastname string, portraitlink string) {
                 <div class="header-separator"></div>
                 <a href="/education" class="m-1 border-transparent border-b-2 box-border hover:underline hover:underline-offset-2 hover:decoration-2">Education</a>
             </div>
+            <script>
+            </script>
             <noscript>
                 <div class="lg:hidden h-auto w-10">
                     <a href={"/menu"} class=""><img src="/icons/hamburgermenuicon.svg" alt="Menu" class="border-transparent border-b-2 box-border hover:underline hover:underline-offset-2 hover:decoration-2"></a>
@@ -252,7 +254,7 @@ templ comp_summarypage_split(pagename string, subtitle string, splittitle string
 //All Carousel logic is handled in carousel.js in ./js/carousel.js
 templ comp_carousel(htmlID string, images []ImageInfo, videoids []string) {
     <script>
-        CreateCarousel({{htmlID}}, {{templ.JSONString(images)}},{{videoids}})
+        const car = new Carousel({{htmlID}}, {{templ.JSONString(images)}}, {{videoids}})
     </script>
 }
 
