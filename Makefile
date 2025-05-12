@@ -7,10 +7,12 @@ js != find src/js/*.js -type f
 buildjs := $(js:src/js/%.js=build/js/%.js)
 templ != find src/webserver/*.templ
 buildtempl := $(templ:%.templ=%_templ.go)
+icons != find src/icons/* -type f
+buildicons := $(icons:src/icons/%=build/icons/%)
 
 .PHONY: clean build run templ tailwindcss
 
-build: build/css/stylesheet.css build/bin/server $(buildsql) $(buildfonts) $(buildjs) build/tls/cert.pem build/tls/key.pem
+build: build/css/stylesheet.css build/bin/server $(buildsql) $(buildfonts) $(buildjs) $(buildicons) build/tls/cert.pem build/tls/key.pem
 
 clean:
 	rm -rf build/
@@ -54,10 +56,17 @@ $(buildsql):build/sql/% :src/sql/%
 	mkdir -p $$(dirname $@)
 	cp $< $@
 
+# Copy font files to build directory
 $(buildfonts):build/fonts/%.ttf:src/fonts/%.ttf
 	mkdir -p $$(dirname $@)
 	cp $< $@
 
+# Copy Javascript scripts to build directory
 $(buildjs):build/js/%.js:src/js/%.js
+	mkdir -p $$(dirname $@)
+	cp $< $@
+
+# Copy icons to build directory
+$(buildicons):build/icons/%:src/icons/%
 	mkdir -p $$(dirname $@)
 	cp $< $@

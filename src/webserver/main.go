@@ -158,6 +158,14 @@ func (app Application) educationSummariesPage(w http.ResponseWriter, r *http.Req
 
 }
 
+func (app Application) menuPage(w http.ResponseWriter, r *http.Request) {
+	Bio := app.dl.FetchBio()
+
+	content := comp_categories()
+	base := app.CreateBase(content, Bio)
+	base.Render(r.Context(), w)
+}
+
 func main() {
 	mux := http.NewServeMux()
 	app := Application{}
@@ -182,13 +190,16 @@ func main() {
 	mux.HandleFunc("/education", app.educationSummariesPage)
 	mux.HandleFunc("/projects/{id}", app.projectPage)
 	mux.HandleFunc("/career/{id}", app.careerPage)
+	mux.HandleFunc("/menu", app.menuPage)
 	//mux.HandleFunc("/education/{id}", app.educationPage)
 	fileServer := http.FileServer(http.Dir("../css/"))
 	fontServer := http.FileServer(http.Dir("../fonts/"))
 	jsServer := http.FileServer(http.Dir("../js/"))
+	iconServer := http.FileServer(http.Dir("../icons/"))
 	mux.Handle("GET /css/", http.StripPrefix("/css", fileServer))
 	mux.Handle("GET /fonts/", http.StripPrefix("/fonts", fontServer))
 	mux.Handle("GET /js/", http.StripPrefix("/js", jsServer))
+	mux.Handle("GET /icons/", http.StripPrefix("/icons", iconServer))
 
 	server := &http.Server{
 		Addr:         fmt.Sprintf(":%s", port),
