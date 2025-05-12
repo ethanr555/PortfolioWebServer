@@ -1,12 +1,12 @@
-go != find src/webserver/*.go
+go != find src/webserver/ -name '*.go' -type f
 sql != find src/sql/* -type f 
 buildsql := $(sql:src/sql/%=build/sql/%)
 fonts != find src/fonts/*.ttf -type f
 buildfonts := $(fonts:src/fonts/%.ttf=build/fonts/%.ttf)
 js != find src/js/*.js -type f
 buildjs := $(js:src/js/%.js=build/js/%.js)
-templ != find src/webserver/*.templ
-buildtempl := $(templ:%.templ=%_templ.go)
+templ != find src/webserver/templ_components/ -name '*.templ' -type f
+buildtempl := $(templ:src/webserver/templ_components/%.templ=src/webserver/components/%_templ.go)
 icons != find src/icons/* -type f
 buildicons := $(icons:src/icons/%=build/icons/%)
 
@@ -16,14 +16,14 @@ build: build/css/stylesheet.css build/bin/server $(buildsql) $(buildfonts) $(bui
 
 clean:
 	rm -rf build/
-	rm src/webserver/*_templ.go
+	find src/webserver/components/ -name '*_templ.go' -type f -exec rm '{}' \;
 
 run:
 	$(MAKE) build
-	cd build/bin/ && ./server
+	cd build/cmd && ./server
 
 templ:
-	templ generate -path src/webserver/
+	make $(buildtempl)
 
 tailwindcss:
 	$(MAKE) build/css/stylesheet.css
@@ -43,13 +43,14 @@ build/css/stylesheet.css : $(buildtempl) src/css/input.css $(buildjs)
 	rm -f build/css/stylesheet.css
 	npx @tailwindcss/cli -m  -i src/css/input.css -o build/css/stylesheet.css 
 
-$(buildtempl):src/webserver/%_templ.go:src/webserver/%.templ
-	cd src/webserver && templ generate -f $*.templ
+$(buildtempl):src/webserver/components/%_templ.go:src/webserver/templ_components/%.templ
+	mkdir -p $$(dirname $@)
+	cd src/webserver/templ_components && templ generate -f $*.templ
+	mv src/webserver/templ_components/$*_templ.go $$(dirname $@)/
 
 # Generates built executable of webserver
 build/bin/server : $(go) $(buildtempl)
-	echo $(buildhtml)
-	go build -C src/webserver/ -o ../../build/bin/server
+	go build -C src/webserver/main -o ../../../build/cmd/server && chmod +x build/cmd/server
 
 # Copy any updated sql files
 $(buildsql):build/sql/% :src/sql/%

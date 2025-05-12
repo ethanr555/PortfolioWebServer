@@ -1,0 +1,37 @@
+package core
+
+import "fmt"
+
+templ Summarysnippet_project(id string, Name string, Description string, ThumbnailLink string, charlimit int, largeimages bool) {
+    {{ ShortenedDesc := Description
+    if len(Description) > charlimit {
+        ShortenedDesc = Description[0:charlimit] + "..."
+    } }}
+    {{
+        // TailwindCSS can only read unbroken strings for utility classes. Having something like h-[%dvh] will
+        // cause the Tailwind compiler to skip it. Due to the use cases of this component, it was found to be
+        // easier and quicker just to have presets, as these can still be read my Tailwind when this file is being
+        // parsed.
+        var ImageSize string
+        if largeimages {
+           ImageSize = "min-h-20 h-2/5 lg:h-50"
+        } else {
+            ImageSize = "min-h-20 h-2/5 lg:h-35"
+        }
+    }}
+    {{ url := fmt.Sprintf("/projects/%s", id)}}
+    //Had to create an extra div for the thumbnail in order to center the images origin. Super annoying but that's the trick.
+    <div class="text-left gap-1 flex items-center flex-col lg:flex-row overflow-hidden">
+        <div class={ "max-lg:mask-b-from-0% w-full lg:w-2/5 lg:h-1 flex items-center overflow-hidden", ImageSize }>
+            if ThumbnailLink != ""{
+                <div class=" w-full lg:h-1 ">
+                    <img class="max-lg:w-full max-lg:h-full object-cover lg:mask-r-from-0% translate-y-0 lg:-translate-y-1/2" src={ ThumbnailLink }>
+                </div>
+            }
+        </div>
+        <div class="h-4/5 lg:w-4/5 -mt-20 lg:mt-0 lg:-ml-20 z-2 lg:h-min text-center lg:text-left">
+            <h2 class="text-1.5xl"><b><a href={ templ.URL(url) }>{Name}</a></b></h2>
+            <p> {ShortenedDesc}</p>
+        </div>
+    </div>
+}
