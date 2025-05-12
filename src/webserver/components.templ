@@ -37,7 +37,7 @@ templ comp_header(firstname string, lastname string, portraitlink string) {
             <img src={ portraitlink } class="rounded-full h-15 w-15 lg:mr-2 ">
             <h1 class="text-4xl text-white">{ firstname } { lastname }</h1>
         </div>
-        <nav class="text-white text-2xl inline-flex align-middle items-center pt-1 pb-1">
+        <nav id="nav" class="text-white text-2xl block lg:inline-flex align-middle items-center pt-1 pb-1">
             <div class="hidden lg:inline-flex">
                 <a href="/" class="m-1 border-transparent border-b-2 box-border hover:underline hover:underline-offset-2 hover:decoration-2">Home</a>
                 <div class="header-separator"></div>
@@ -47,7 +47,18 @@ templ comp_header(firstname string, lastname string, portraitlink string) {
                 <div class="header-separator"></div>
                 <a href="/education" class="m-1 border-transparent border-b-2 box-border hover:underline hover:underline-offset-2 hover:decoration-2">Education</a>
             </div>
+            <script src="/js/headermenu.js"></script>
             <script>
+                var menuhandler = new MobileNavMenu("nav")
+                const containerdiv = document.createElement('div')
+                containerdiv.className = "lg:hidden h-auto w-10 ml-auto mr-auto"
+                const imageicon = document.createElement('img')
+                imageicon.src = "/icons/hamburgermenuicon.svg"
+                imageicon.alt = "Menu"
+                imageicon.className = "border-transparent border-b-2 box-border hover:underline hover:underline-offset-2 hover:decoration-2 hover:cursor-pointer"
+                imageicon.onclick = () => menuhandler.ToggleMenu()
+                containerdiv.appendChild(imageicon)
+                document.getElementById('nav').appendChild(containerdiv)           
             </script>
             <noscript>
                 <div class="lg:hidden h-auto w-10">
@@ -278,10 +289,11 @@ templ comp_footer(resumelink string, email string, linkedinlink string, githubli
 }
 
 templ comp_categories() {
-    <div>
-        <a href={ templ.SafeURL("/")}>Home</a>
-        <a href={ templ.SafeURL("/projects")}>Projects</a>
-        <a href={ templ.SafeURL("/careers")}>Career</a>
-        <a href={ templ.SafeURL("/education")}>Education</a>
+    {{ lnkclass := "bg-blue-500 text-white rounded-2xl p-10 w-full text-center align-middle hover:bg-blue-300 hover:text-white mt-5 mb-5" }}
+    <div class="items-center align-middle flex flex-col mt-10 mb-10 ml-20 mr-20">
+        <a href={ templ.SafeURL("/")} class={ lnkclass }><b>Home</b></a>
+        <a href={ templ.SafeURL("/projects")} class={ lnkclass }><b>Projects</b></a>
+        <a href={ templ.SafeURL("/careers")} class={ lnkclass }><b>Career</b></a>
+        <a href={ templ.SafeURL("/education")} class={ lnkclass }><b>Education</b></a>
     </div>
 }
