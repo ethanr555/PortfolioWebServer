@@ -1,0 +1,21 @@
+package core
+
+// Serves as the root component for the 
+templ Base(header templ.Component, content templ.Component, footer templ.Component) {
+    <!DOCTYPE html>
+	<head>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0"> 
+        <link rel="stylesheet" href="/css/stylesheet.css" type="text/css">
+	</head>
+	<body class="font-display flex flex-col justify-between min-h-screen lg:text-base">
+        <header class="">
+        @header
+        </header>
+        <div class="pl-5 pr-5 lg:pl-40 lg:pr-40 font-display shadow-2xl grow flex-1">
+            @content
+        </div>
+        <footer class="">
+        @footer
+        </footer>
+	</body>
+}

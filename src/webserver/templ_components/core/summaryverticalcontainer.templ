@@ -1,0 +1,11 @@
+package core
+
+templ Summaryverticalcontainer(comps []templ.Component) {
+   <div>
+        for _, comp := range comps {
+            <div class="shadow-2xl bg-white hover:bg-blue-400 hover:text-white m-1 p-2 rounded-md">
+                @comp
+            </div>
+        }
+   </div> 
+}

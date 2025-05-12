@@ -1,0 +1,11 @@
+package content
+
+import core "webserver.ethanrandolph.com/components/core"
+
+templ Summarypage(pagename string, subtitle string, items []templ.Component, ) {
+    <div class="pb-20">
+        <h1 class=" text-4xl lg:text-6xl text-center pt-10 pb-5">{ pagename }</h1>
+        <h2 class="text-2xl text-center pt-5 pb-10">{ subtitle}</h2>
+        @core.Summaryverticalcontainer(items)
+    </div>
+}

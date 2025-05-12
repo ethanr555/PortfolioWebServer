@@ -1,0 +1,39 @@
+package core
+
+templ Header(firstname string, lastname string, portraitlink string) {
+    <div class="flex flex-col lg:flex-row bg-blue-500 items-center lg:items-start lg:align-middle lg:justify-between pt-5 pb-5 lg:pl-40 lg:pr-40 pl-5 pr-5">
+        <div class="flex flex-col lg:flex-row align-middle items-center">
+            <img src={ portraitlink } class="rounded-full h-15 w-15 lg:mr-2 ">
+            <h1 class="text-4xl text-white">{ firstname } { lastname }</h1>
+        </div>
+        <nav id="nav" class="text-white text-2xl block lg:inline-flex align-middle items-center pt-1 pb-1">
+            <div class="hidden lg:inline-flex">
+                <a href="/" class="m-1 border-transparent border-b-2 box-border hover:underline hover:underline-offset-2 hover:decoration-2">Home</a>
+                <div class="header-separator"></div>
+                <a href="/projects" class="m-1 border-transparent border-b-2 box-border hover:underline hover:underline-offset-2 hover:decoration-2">Projects</a>
+                <div class="header-separator"></div>
+                <a href="/careers" class="m-1 border-transparent border-b-2 box-border hover:underline hover:underline-offset-2 hover:decoration-2">Career</a>
+                <div class="header-separator"></div>
+                <a href="/education" class="m-1 border-transparent border-b-2 box-border hover:underline hover:underline-offset-2 hover:decoration-2">Education</a>
+            </div>
+            <script src="/js/headermenu.js"></script>
+            <script>
+                var menuhandler = new MobileNavMenu("nav")
+                const containerdiv = document.createElement('div')
+                containerdiv.className = "lg:hidden h-auto w-10 ml-auto mr-auto"
+                const imageicon = document.createElement('img')
+                imageicon.src = "/icons/hamburgermenuicon.svg"
+                imageicon.alt = "Menu"
+                imageicon.className = "border-transparent border-b-2 box-border hover:underline hover:underline-offset-2 hover:decoration-2 hover:cursor-pointer"
+                imageicon.onclick = () => menuhandler.ToggleMenu()
+                containerdiv.appendChild(imageicon)
+                document.getElementById('nav').appendChild(containerdiv)           
+            </script>
+            <noscript>
+                <div class="lg:hidden h-auto w-10">
+                    <a href={"/menu"} class=""><img src="/icons/hamburgermenuicon.svg" alt="Menu" class="border-transparent border-b-2 box-border hover:underline hover:underline-offset-2 hover:decoration-2"></a>
+                </div>
+            </noscript>
+        </nav>
+    </div>
+}

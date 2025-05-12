@@ -1,0 +1,66 @@
+package content
+
+import core "webserver.ethanrandolph.com/components/core"
+
+templ Project(name string, CodeRepo string, Website string, CompanyName string, 
+                    Team string, Tools []string, Date string, Description string, 
+                    images []core.ImageInfo, videoids []string) {
+    <div class="">
+        <h1 class="text-3xl text-center p-10"><b>{name}</b></h1>
+        <div id="carousel">
+        </div>
+        // Grid for details and description
+        <div class="text-center lg:text-left lg:grid lg:grid-cols-[25%_75%] lg:grid-rows-1">
+            <div>
+                if Date != "" {
+                    <div>{ Date }</div>
+                }
+                if CodeRepo != "" {
+                    <div> Public Code Repository: { CodeRepo }</div>
+                }
+                if Website != "" {
+                    <div> Project Website: { Website }</div>
+                }
+                if CompanyName != "" {
+                    <div> Company: { CompanyName } </div>
+                }
+                if Team != "" {
+                    <div> Team: { Team } </div>
+                }
+                if len(Tools) > 0 {
+                    <div>
+                        <p>Tools: 
+                        for i := 0; i < len(Tools); i++ {
+                           { Tools[i] }
+                            if i + 1 < len(Tools) {
+                                { ", " }
+                            }
+                        }
+                        </p>
+                    </div>
+                }
+            </div>
+            <div>
+                <p>
+                    { Description }
+                </p>
+            </div>
+        </div>
+        if len(images) > 0 {
+            <noscript>
+                <h2 class="text-center text-2xl p-10">Images:</h2>
+                <div class="grid auto-rows-auto grid-cols-5">
+                    //WIP Image Gallery for NoScript/Javascript not supported browsers
+                    for _, image := range images {
+                        <a href={ templ.SafeURL(image.ImageLink) }><img src={ image.ImageThumbnail }></a>
+                    }
+
+                </div>
+            </noscript>
+        }
+        if len(images) > 0 || len(videoids) > 0 {
+            <script src="/js/carousel.js"></script>
+            @core.Carousel("carousel", images, videoids)
+        }
+    </div>
+}

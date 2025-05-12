@@ -1,0 +1,22 @@
+package core
+
+import "fmt"
+
+templ Footer(resumelink string, email string, linkedinlink string, githublink string) {
+    {{ emaillink := fmt.Sprintf("mailto:%s", email)}}
+    <div class="bg-blue-500 flex justify-between pl-5 pr-5 lg:pl-40 lg:pr-40 pt-10 pb-10">
+        <a href={ templ.SafeURL(resumelink) } class="bg-white text-blue-500 rounded-2xl p-10 text-center align-middle hover:bg-blue-300 hover:text-white" ><b>Download Resume</b> </a>
+        <div class="flex flex-col text-white text-right align-center content-center">
+            <h2><u><b>Socials:</b></u></h2>
+            <div class="flex-row">
+            <a href={ templ.SafeURL(emaillink) } class="hover:underline">Email</a>
+            </div>
+            <div class="flex-row">
+            <a href={ templ.SafeURL(linkedinlink) } class="hover:underline"> LinkedIn</a>
+            </div>
+            <div class="flex-row">
+            <a href={ templ.SafeURL(githublink)} class="hover:underline">Github</a>
+            </div>
+        </div>
+    </div>
+}

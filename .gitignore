@@ -2,7 +2,7 @@
 build/
 
 # Ignore templ-generated go files
-src/webserver/*_templ.go
+*_templ.go
 
 # Ignore vscode config
 .vscode/

@@ -9,6 +9,8 @@ import (
 	"time"
 
 	"github.com/a-h/templ"
+	components_content "webserver.ethanrandolph.com/components/content"
+	components_core "webserver.ethanrandolph.com/components/core"
 )
 
 type Application struct {
@@ -16,9 +18,9 @@ type Application struct {
 }
 
 func (app Application) CreateBase(content templ.Component, bio FetchBiographyResult) templ.Component {
-	header := comp_header(bio.Firstname, bio.Lastname, bio.PortaitLink)
-	footer := comp_footer(bio.ResumeLink, bio.Email, bio.Linkedinlink, bio.Githublink)
-	base := comp_base(header, content, footer)
+	header := components_core.Header(bio.Firstname, bio.Lastname, bio.PortaitLink)
+	footer := components_core.Footer(bio.ResumeLink, bio.Email, bio.Linkedinlink, bio.Githublink)
+	base := components_core.Base(header, content, footer)
 	return base
 }
 
@@ -30,27 +32,27 @@ func (app Application) home_page(w http.ResponseWriter, r *http.Request) {
 	edu_summaries := app.dl.FetchEducationSummaries(3)
 
 	//Create Bio snippet
-	biocomp := comp_biosnippet(Bio.Description)
+	biocomp := components_core.Biosnippet(Bio.Description)
 
 	var proj_items []templ.Component
 	//Create items for project summary
 	for _, item := range proj_summaries {
-		proj_items = append(proj_items, comp_summarysnippet_project(strconv.Itoa(item.Id), item.Name, item.Description, item.Thumbnaillink, 200, false))
+		proj_items = append(proj_items, components_core.Summarysnippet_project(strconv.Itoa(item.Id), item.Name, item.Description, item.Thumbnaillink, 200, false))
 	}
 	var car_items []templ.Component
 	for _, item := range car_summaries {
-		car_items = append(car_items, comp_summarysnippet_career(item.Id, item.Title, item.Name, item.Description, 200))
+		car_items = append(car_items, components_core.Summarysnippet_career(item.Id, item.Title, item.Name, item.Description, 200))
 	}
 	var edu_items []templ.Component
 	for _, item := range edu_summaries {
-		edu_items = append(edu_items, comp_summarysnippet_education(item.Title, item.Major, fmt.Sprintf("%d - %d", item.StartDate, item.EndDate)))
+		edu_items = append(edu_items, components_core.Summarysnippet_education(item.Title, item.Major, fmt.Sprintf("%d - %d", item.StartDate, item.EndDate)))
 	}
 
-	proj_list := comp_summaryverticalcontainer(proj_items)
-	car_list := comp_summaryverticalcontainer(car_items)
-	edu_list := comp_summaryverticalcontainer(edu_items)
+	proj_list := components_core.Summaryverticalcontainer(proj_items)
+	car_list := components_core.Summaryverticalcontainer(car_items)
+	edu_list := components_core.Summaryverticalcontainer(edu_items)
 
-	content := comp_home(biocomp, proj_list, car_list, edu_list)
+	content := components_content.Home(biocomp, proj_list, car_list, edu_list)
 	base := app.CreateBase(content, Bio)
 	base.Render(r.Context(), w)
 }
@@ -68,15 +70,15 @@ func (app Application) projectPage(w http.ResponseWriter, r *http.Request) {
 	}
 	projectvideos := app.dl.FetchProjectVideos(id)
 	var videos []string
-	var images []ImageInfo
+	var images []components_core.ImageInfo
 	for _, video := range projectvideos {
 		videos = append(videos, video.VideoYoutubeID)
 	}
 	for _, image := range projectimages {
-		images = append(images, ImageInfo{ImageLink: image.Imagelink, ImageThumbnail: image.Imagethumbnaillink})
+		images = append(images, components_core.ImageInfo{ImageLink: image.Imagelink, ImageThumbnail: image.Imagethumbnaillink})
 	}
 
-	content := comp_project(project.Name, project.Repolink, project.Sitelink, project.Companyname,
+	content := components_content.Project(project.Name, project.Repolink, project.Sitelink, project.Companyname,
 		"TODO", toolnames, fmt.Sprintf("%d - %d", project.Startyear, project.Endyear),
 		project.Description, images, videos)
 
@@ -88,7 +90,7 @@ func (app Application) careerPage(w http.ResponseWriter, r *http.Request) {
 	Bio := app.dl.FetchBio()
 	id := r.PathValue("id")
 	career := app.dl.FetchCareer(id)
-	page := comp_career(career.Title, career.Companyname, career.Description, fmt.Sprintf("%s %d - %s %d", career.Startmonth, career.Startyear, career.Endmonth, career.Endyear))
+	page := components_content.Career(career.Title, career.Companyname, career.Description, fmt.Sprintf("%s %d - %s %d", career.Startmonth, career.Startyear, career.Endmonth, career.Endyear))
 	base := app.CreateBase(page, Bio)
 	base.Render(r.Context(), w)
 }
@@ -111,15 +113,15 @@ func (app Application) projectSummariesPage(w http.ResponseWriter, r *http.Reque
 		if summary.IsCareer {
 			break
 		}
-		item := comp_summarysnippet_project(strconv.Itoa(summary.Id), summary.Name, summary.Description, summary.Thumbnaillink, 500, true)
+		item := components_core.Summarysnippet_project(strconv.Itoa(summary.Id), summary.Name, summary.Description, summary.Thumbnaillink, 500, true)
 		topitems = append(topitems, item)
 	}
 	for j := i; j < len(summaries); j++ {
-		item := comp_summarysnippet_project(strconv.Itoa(summaries[j].Id), summaries[j].Name, summaries[j].Description, summaries[j].Thumbnaillink, 500, true)
+		item := components_core.Summarysnippet_project(strconv.Itoa(summaries[j].Id), summaries[j].Name, summaries[j].Description, summaries[j].Thumbnaillink, 500, true)
 		botitems = append(botitems, item)
 	}
 
-	content := comp_summarypage_split("Projects", "Click on any entry below for detailed information", "Career Projects", topitems, botitems)
+	content := components_content.Summarypage_split("Projects", "Click on any entry below for detailed information", "Career Projects", topitems, botitems)
 	base := app.CreateBase(content, Bio)
 	base.Render(r.Context(), w)
 }
@@ -132,11 +134,11 @@ func (app Application) careerSummariesPage(w http.ResponseWriter, r *http.Reques
 	//Finish
 	var items []templ.Component
 	for _, summary := range summaries {
-		item := comp_summarysnippet_career(summary.Id, summary.Title, summary.Name, summary.Description, 500)
+		item := components_core.Summarysnippet_career(summary.Id, summary.Title, summary.Name, summary.Description, 500)
 		items = append(items, item)
 	}
 
-	content := comp_summarypage("Career", "Click on any entry below for detailed information", items)
+	content := components_content.Summarypage("Career", "Click on any entry below for detailed information", items)
 	base := app.CreateBase(content, Bio)
 	base.Render(r.Context(), w)
 }
@@ -148,11 +150,11 @@ func (app Application) educationSummariesPage(w http.ResponseWriter, r *http.Req
 	//Finish
 	var items []templ.Component
 	for _, summary := range summaries {
-		item := comp_summarysnippet_education(summary.Title, summary.Major, fmt.Sprintf("%d - %d", summary.StartDate, summary.EndDate))
+		item := components_core.Summarysnippet_education(summary.Title, summary.Major, fmt.Sprintf("%d - %d", summary.StartDate, summary.EndDate))
 		items = append(items, item)
 	}
 
-	content := comp_summarypage("Education", "", items)
+	content := components_content.Summarypage("Education", "", items)
 	base := app.CreateBase(content, Bio)
 	base.Render(r.Context(), w)
 
@@ -161,7 +163,7 @@ func (app Application) educationSummariesPage(w http.ResponseWriter, r *http.Req
 func (app Application) menuPage(w http.ResponseWriter, r *http.Request) {
 	Bio := app.dl.FetchBio()
 
-	content := comp_categories()
+	content := components_content.Categories()
 	base := app.CreateBase(content, Bio)
 	base.Render(r.Context(), w)
 }
