@@ -1,4 +1,6 @@
 go != find src/webserver/ -name '*.go' -type f
+templgo != find src/webserver/templ_components/ -name '*.go' -type f
+buildtemplgo := $(templgo:src/webserver/templ_components/%.go=src/webserver/components/%.go)
 sql != find src/sql/* -type f 
 buildsql := $(sql:src/sql/%=build/sql/%)
 fonts != find src/fonts/*.ttf -type f
@@ -12,7 +14,7 @@ buildicons := $(icons:src/icons/%=build/icons/%)
 
 .PHONY: clean build run templ tailwindcss
 
-build: build/css/stylesheet.css build/bin/server $(buildsql) $(buildfonts) $(buildjs) $(buildicons) build/tls/cert.pem build/tls/key.pem
+build: build/css/stylesheet.css build/cmd/server $(buildsql) $(buildfonts) $(buildjs) $(buildicons) build/tls/cert.pem build/tls/key.pem
 
 clean:
 	rm -rf build/
@@ -24,6 +26,7 @@ run:
 
 templ:
 	make $(buildtempl)
+	make $(buildtemplgo)
 
 tailwindcss:
 	$(MAKE) build/css/stylesheet.css
@@ -31,7 +34,7 @@ tailwindcss:
 # Generates self-signed certificates for build if none exist already. This presumes Go is installed in the location suggested by the official Go docs.
 # If certificates need to be renewed for testing, simply delete the files.
 # In production, use proper certificates signed by an authority rather than the ones generated here.
-build/tls/cert.pem build/tls/key.pem: | build/bin/server
+build/tls/cert.pem build/tls/key.pem: | build/cmd/server
 	mkdir -p $$(dirname $@)	
 	cd build/tls/ && go run /usr/local/go/src/crypto/tls/generate_cert.go --rsa-bits=2048 --host=localhost
 
@@ -48,8 +51,12 @@ $(buildtempl):src/webserver/components/%_templ.go:src/webserver/templ_components
 	cd src/webserver/templ_components && templ generate -f $*.templ
 	mv src/webserver/templ_components/$*_templ.go $$(dirname $@)/
 
+$(buildtemplgo):src/webserver/components/%.go:src/webserver/templ_components/%.go
+	mkdir -p $$(dirname $@)
+	cp src/webserver/templ_components/$*.go src/webserver/components/$*.go
+
 # Generates built executable of webserver
-build/bin/server : $(go) $(buildtempl)
+build/cmd/server : $(go) $(buildtempl) $(buildtemplgo)
 	go build -C src/webserver/main -o ../../../build/cmd/server && chmod +x build/cmd/server
 
 # Copy any updated sql files

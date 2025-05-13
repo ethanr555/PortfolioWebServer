@@ -4,6 +4,9 @@ build/
 # Ignore templ-generated go files
 *_templ.go
 
+# Ignore components directory as its a build generated package for templ
+src/webserver/components/
+
 # Ignore vscode config
 .vscode/
 
