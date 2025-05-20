@@ -1,5 +1,4 @@
 
-
 class MobileNavMenu {
     constructor(id) {
         this.id = id
@@ -60,4 +59,17 @@ class MobileNavMenu {
         }
     }
 
+}
+
+if (document.getElementById("nav")) {
+    const menuhandler = new MobileNavMenu("nav")
+    const containerdiv = document.createElement('div')
+    containerdiv.className = "lg:hidden h-auto w-10 ml-auto mr-auto"
+    const imageicon = document.createElement('img')
+    imageicon.src = "/icons/hamburgermenuicon.svg"
+    imageicon.alt = "Menu"
+    imageicon.className = "border-transparent border-b-2 box-border hover:underline hover:underline-offset-2 hover:decoration-2 hover:cursor-pointer"
+    imageicon.onclick = () => menuhandler.ToggleMenu()
+    containerdiv.appendChild(imageicon)
+    document.getElementById('nav').appendChild(containerdiv)           
 }

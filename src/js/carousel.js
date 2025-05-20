@@ -1,3 +1,22 @@
+// Find if there is an element requesting this:
+potentialElement = document.getElementById("carousel")
+if (potentialElement != null) {
+    const mediaURL = window.location.href + "/media.json"
+    const mediaRequest = new Request(mediaURL)
+    fetch(mediaRequest)
+    .then((Response) => Response.json())
+    .then((data) => {
+
+        let images = []
+        for (let i = 0; i < data.ThumbnailUrls.length; i++)
+        {
+            images.push({"ImageLink": data.ImageUrls[i], "ImageThumbnail": data.ThumbnailUrls[i]})
+        }
+
+        const car = new Carousel("carousel", images, data.VideoUrls)
+    })
+}
+
 
 // images: {'ImageLink': string, 'ImageThumbnail': string}[]
 
@@ -66,7 +85,7 @@ class Carousel {
         this.gallery.className = "min-h-[66vw] min-w-lvw lg:min-h-100 lg:min-w-150 overflow-hidden"
         const thumbnailselection = document.createElement('div')
         thumbnailselection.className = "flex h-50 min-w-50 overflow-x-scroll snap-mandatory snap-x"
-        let imagesobj = JSON.parse(this.images)
+        let imagesobj = this.images
         for (let i = 0; i < this.videoids.length; i++)
         {
             let thumbnail = document.createElement('img')

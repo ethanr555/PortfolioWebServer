@@ -2,8 +2,6 @@ package core
 
 //All Carousel logic is handled in carousel.js in ./js/carousel.js
 //ImageInfo will get flagged incorrectly by LSP because definition is in templ build directories.
-templ Carousel(htmlID string, images []ImageInfo, videoids []string) {
-    <script>
-        const car = new Carousel({{htmlID}}, {{templ.JSONString(images)}}, {{videoids}})
-    </script>
+templ Carousel() {
+    <div id="carousel"></div>
 }

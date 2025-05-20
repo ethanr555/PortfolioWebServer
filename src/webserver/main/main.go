@@ -220,7 +220,7 @@ func main() {
 	mux.HandleFunc("/careers", app.careerSummariesPage)
 	mux.HandleFunc("/education", app.educationSummariesPage)
 	mux.HandleFunc("/projects/{id}", app.projectPage)
-	mux.HandleFunc("/projects/{id}/media", app.projectMediaJson)
+	mux.HandleFunc("/projects/{id}/media.json", app.projectMediaJson)
 	mux.HandleFunc("/career/{id}", app.careerPage)
 	mux.HandleFunc("/menu", app.menuPage)
 	//mux.HandleFunc("/education/{id}", app.educationPage)
