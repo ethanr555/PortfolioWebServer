@@ -1,5 +1,4 @@
 
-
 class MobileNavMenu {
     constructor(id) {
         this.id = id
@@ -61,3 +60,4 @@ class MobileNavMenu {
     }
 
 }
+

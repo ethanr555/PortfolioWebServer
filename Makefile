@@ -6,7 +6,6 @@ buildsql := $(sql:src/sql/%=build/sql/%)
 fonts != find src/fonts/*.ttf -type f
 buildfonts := $(fonts:src/fonts/%.ttf=build/fonts/%.ttf)
 js != find src/js/*.js -type f
-buildjs := $(js:src/js/%.js=build/js/%.js)
 templ != find src/webserver/templ_components/ -name '*.templ' -type f
 buildtempl := $(templ:src/webserver/templ_components/%.templ=src/webserver/components/%_templ.go)
 icons != find src/icons/* -type f
@@ -14,7 +13,7 @@ buildicons := $(icons:src/icons/%=build/icons/%)
 
 .PHONY: clean build run templ tailwindcss
 
-build: build/css/stylesheet.css build/cmd/server $(buildsql) $(buildfonts) $(buildjs) $(buildicons) build/tls/cert.pem build/tls/key.pem
+build: build/css/stylesheet.css build/cmd/server $(buildsql) $(buildfonts) build/js/out.js $(buildicons) build/tls/cert.pem build/tls/key.pem
 
 clean:
 	rm -rf build/
@@ -42,7 +41,7 @@ build/tls/cert.pem build/tls/key.pem: | build/cmd/server
 # Any of these three files could result in new TailwindCSS utility classes being added.
 # Removes old stylesheet.css in the case that the prerequistes were updated but no new utility classes were called resulting in the stylesheet.css being skipped by the
 # TailwindCSS cli tool
-build/css/stylesheet.css : $(buildtempl) src/css/input.css $(buildjs)
+build/css/stylesheet.css : $(buildtempl) src/css/input.css build/js/out.js 
 	rm -f build/css/stylesheet.css
 	npx @tailwindcss/cli -m  -i src/css/input.css -o build/css/stylesheet.css 
 
@@ -69,10 +68,10 @@ $(buildfonts):build/fonts/%.ttf:src/fonts/%.ttf
 	mkdir -p $$(dirname $@)
 	cp $< $@
 
-# Copy Javascript scripts to build directory
-$(buildjs):build/js/%.js:src/js/%.js
-	mkdir -p $$(dirname $@)
-	cp $< $@
+# Minify Javascript scripts to build directory
+build/js/out.js: $(js)
+	mkdir -p build/js
+	minify -b -r -o ./build/js/out.js ./src/js/
 
 # Copy icons to build directory
 $(buildicons):build/icons/%:src/icons/%

@@ -7,8 +7,9 @@ templ Project(name string, CodeRepo string, Website string, CompanyName string,
                     images []core.ImageInfo, videoids []string) {
     <div class="">
         <h1 class="text-3xl text-center p-10"><b>{name}</b></h1>
-        <div id="carousel">
-        </div>
+        if len(images) > 0 || len(videoids) > 0 {
+            @core.Carousel()
+        }
         // Grid for details and description
         <div class="text-center lg:text-left lg:grid lg:grid-cols-[25%_75%] lg:grid-rows-1">
             <div>
@@ -54,13 +55,8 @@ templ Project(name string, CodeRepo string, Website string, CompanyName string,
                     for _, image := range images {
                         <a href={ templ.SafeURL(image.ImageLink) }><img src={ image.ImageThumbnail }></a>
                     }
-
                 </div>
             </noscript>
-        }
-        if len(images) > 0 || len(videoids) > 0 {
-            <script src="/js/carousel.js"></script>
-            @core.Carousel("carousel", images, videoids)
         }
     </div>
 }

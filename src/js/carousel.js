@@ -1,4 +1,3 @@
-
 // images: {'ImageLink': string, 'ImageThumbnail': string}[]
 
 // Creates an image/video carousel in parent element
@@ -66,7 +65,7 @@ class Carousel {
         this.gallery.className = "min-h-[66vw] min-w-lvw lg:min-h-100 lg:min-w-150 overflow-hidden"
         const thumbnailselection = document.createElement('div')
         thumbnailselection.className = "flex h-50 min-w-50 overflow-x-scroll snap-mandatory snap-x"
-        let imagesobj = JSON.parse(this.images)
+        let imagesobj = this.images
         for (let i = 0; i < this.videoids.length; i++)
         {
             let thumbnail = document.createElement('img')
@@ -92,5 +91,3 @@ class Carousel {
         thumbnailselection.firstElementChild.click()
     }
 }
-
-

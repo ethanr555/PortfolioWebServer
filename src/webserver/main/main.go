@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"flag"
 	"fmt"
 	"net/http"
@@ -168,6 +169,34 @@ func (app Application) menuPage(w http.ResponseWriter, r *http.Request) {
 	base.Render(r.Context(), w)
 }
 
+type mediaJsonPayload struct {
+	VideoUrls     []string
+	ImageUrls     []string
+	ThumbnailUrls []string
+}
+
+func (app Application) projectMediaJson(w http.ResponseWriter, r *http.Request) {
+	id := r.PathValue("id")
+	gopayload := mediaJsonPayload{}
+	videos := app.dl.FetchProjectVideos(id)
+	images := app.dl.FetchProjectImages(id)
+
+	for _, video := range videos {
+		gopayload.VideoUrls = append(gopayload.VideoUrls, video.VideoYoutubeID)
+	}
+	for _, image := range images {
+		gopayload.ImageUrls = append(gopayload.ImageUrls, image.Imagelink)
+		gopayload.ThumbnailUrls = append(gopayload.ThumbnailUrls, image.Imagethumbnaillink)
+	}
+	payload, err := json.Marshal(gopayload)
+	if err != nil {
+		fmt.Printf("Error occurred when serializing JSON: %s", err.Error())
+		return
+	}
+	w.Header().Add("Content-Type", "application/json")
+	w.Write(payload)
+}
+
 func main() {
 	mux := http.NewServeMux()
 	app := Application{}
@@ -191,6 +220,7 @@ func main() {
 	mux.HandleFunc("/careers", app.careerSummariesPage)
 	mux.HandleFunc("/education", app.educationSummariesPage)
 	mux.HandleFunc("/projects/{id}", app.projectPage)
+	mux.HandleFunc("/projects/{id}/media.json", app.projectMediaJson)
 	mux.HandleFunc("/career/{id}", app.careerPage)
 	mux.HandleFunc("/menu", app.menuPage)
 	//mux.HandleFunc("/education/{id}", app.educationPage)
