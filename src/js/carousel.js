@@ -1,23 +1,3 @@
-// Find if there is an element requesting this:
-potentialElement = document.getElementById("carousel")
-if (potentialElement != null) {
-    const mediaURL = window.location.href + "/media.json"
-    const mediaRequest = new Request(mediaURL)
-    fetch(mediaRequest)
-    .then((Response) => Response.json())
-    .then((data) => {
-
-        let images = []
-        for (let i = 0; i < data.ThumbnailUrls.length; i++)
-        {
-            images.push({"ImageLink": data.ImageUrls[i], "ImageThumbnail": data.ThumbnailUrls[i]})
-        }
-
-        const car = new Carousel("carousel", images, data.VideoUrls)
-    })
-}
-
-
 // images: {'ImageLink': string, 'ImageThumbnail': string}[]
 
 // Creates an image/video carousel in parent element
@@ -111,5 +91,3 @@ class Carousel {
         thumbnailselection.firstElementChild.click()
     }
 }
-
-
