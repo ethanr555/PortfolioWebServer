@@ -12,3 +12,6 @@ src/webserver/components/
 
 # Ignore log files
 *.log
+
+# Ignore local tailwindcss installation
+tools/*

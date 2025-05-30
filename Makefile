@@ -11,12 +11,13 @@ buildtempl := $(templ:src/webserver/templ_components/%.templ=src/webserver/compo
 icons != find src/icons/* -type f
 buildicons := $(icons:src/icons/%=build/icons/%)
 
-.PHONY: clean build run templ tailwindcss
+.PHONY: clean build run templ tailwindcss configure complete
 
-build: build/css/stylesheet.css build/cmd/server $(buildsql) $(buildfonts) build/js/out.js $(buildicons) build/tls/cert.pem build/tls/key.pem
+build: build/css/stylesheet.css build/cmd/server $(buildsql) $(buildfonts) build/js/out.js $(buildicons) build/tls/cert.pem build/tls/key.pem 
 
 clean:
 	rm -rf build/
+	rm -rf tools/ 
 	find src/webserver/components/ -name '*_templ.go' -type f -exec rm '{}' \;
 
 run:
@@ -41,9 +42,9 @@ build/tls/cert.pem build/tls/key.pem: | build/cmd/server
 # Any of these three files could result in new TailwindCSS utility classes being added.
 # Removes old stylesheet.css in the case that the prerequistes were updated but no new utility classes were called resulting in the stylesheet.css being skipped by the
 # TailwindCSS cli tool
-build/css/stylesheet.css : $(buildtempl) src/css/input.css build/js/out.js 
+build/css/stylesheet.css : $(buildtempl) src/css/input.css build/js/out.js | tools/tailwindcss 
 	rm -f build/css/stylesheet.css
-	npx @tailwindcss/cli -m  -i src/css/input.css -o build/css/stylesheet.css 
+	tools/tailwindcss -m  -i src/css/input.css -o build/css/stylesheet.css 
 
 $(buildtempl):src/webserver/components/%_templ.go:src/webserver/templ_components/%.templ
 	mkdir -p $$(dirname $@)
@@ -77,3 +78,20 @@ build/js/out.js: $(js)
 $(buildicons):build/icons/%:src/icons/%
 	mkdir -p $$(dirname $@)
 	cp $< $@
+
+configure:
+#	Install project dependencies
+	cd src/webserver/ && go mod download
+#	Install minify binary to GOPATH
+	go install github.com/tdewolff/minify/v2/cmd/minify@v2.23.5
+
+# Install TailwindCSS-CLI standalone executable
+tools/tailwindcss:
+	mkdir -p tools
+	wget -O tools/tailwindcss https://github.com/tailwindlabs/tailwindcss/releases/download/v4.1.7/tailwindcss-linux-x64
+	chmod +x tools/tailwindcss
+
+# Handles dependency configuration and building
+complete:
+	make configure
+	make build
