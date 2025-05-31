@@ -36,7 +36,7 @@ tailwindcss:
 # In production, use proper certificates signed by an authority rather than the ones generated here.
 build/tls/cert.pem build/tls/key.pem: | build/cmd/server
 	mkdir -p $$(dirname $@)	
-	cd build/tls/ && go run /usr/local/go/src/crypto/tls/generate_cert.go --rsa-bits=2048 --host=localhost
+	cd build/tls/ && go run /usr/local/go/src/crypto/tls/generate_cert.go --rsa-bits=2048 --host=127.0.0.1
 
 # Generates Tailwindcss if Templ HTML has been updated, if the the input.css file has been updated, or if the javascript files have been updated.
 # Any of these three files could result in new TailwindCSS utility classes being added.
