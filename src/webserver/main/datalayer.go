@@ -108,7 +108,6 @@ type FetchBiographyResult struct {
 
 func (dl *Datalayer) Init(path string, ip string, port string, databasename string, username string, password string) {
 	url := fmt.Sprintf("postgres://%s:%s@%s:%s/%s", username, password, ip, port, databasename)
-	fmt.Println(url)
 	conn, err := pgxpool.New(context.Background(), url)
 	if err != nil {
 		fmt.Println("Connection error!")
