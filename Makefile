@@ -11,7 +11,7 @@ buildtempl := $(templ:src/webserver/templ_components/%.templ=src/webserver/compo
 icons != find src/icons/* -type f
 buildicons := $(icons:src/icons/%=build/icons/%)
 
-.PHONY: clean build run templ tailwindcss configure complete
+.PHONY: clean build run templ tailwindcss configure complete docker
 
 build: build/css/stylesheet.css build/cmd/server $(buildsql) $(buildfonts) build/js/out.js $(buildicons) build/tls/cert.pem build/tls/key.pem 
 
@@ -36,7 +36,7 @@ tailwindcss:
 # In production, use proper certificates signed by an authority rather than the ones generated here.
 build/tls/cert.pem build/tls/key.pem: | build/cmd/server
 	mkdir -p $$(dirname $@)	
-	cd build/tls/ && go run /usr/local/go/src/crypto/tls/generate_cert.go --rsa-bits=2048 --host=localhost
+	cd build/tls/ && go run /usr/local/go/src/crypto/tls/generate_cert.go --rsa-bits=2048 --host=127.0.0.1
 
 # Generates Tailwindcss if Templ HTML has been updated, if the the input.css file has been updated, or if the javascript files have been updated.
 # Any of these three files could result in new TailwindCSS utility classes being added.
@@ -95,3 +95,6 @@ tools/tailwindcss:
 complete:
 	make configure
 	make build
+
+docker:
+	sudo docker build . -t com.ethanrandolph.webserver

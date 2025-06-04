@@ -1,0 +1,19 @@
+FROM ubuntu:22.04
+
+WORKDIR /usr/local/webserver/cmd/
+
+# Empty defaults for environment variables needed by application. Exists primarily for documentation.
+ENV PORTFOLIOSERVER_PORT=""
+ENV PORTFOLIOSERVER_DBIP=""
+ENV PORTFOLIOSERVER_DBPORT=0
+ENV PORTFOLIOSERVER_DBNAME=""
+ENV PORTFOLIOSERVER_DBUSER=""
+ENV PORTFOLIOSERVER_DBPASS=""
+ENV PORTFOLIOSERVER_CERT=""
+ENV PORTFOLIOSERVER_KEY=""
+
+COPY build ../
+
+EXPOSE $PORTFOLIOSERVER_PORT
+
+CMD ["./server"]
