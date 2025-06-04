@@ -11,7 +11,7 @@ buildtempl := $(templ:src/webserver/templ_components/%.templ=src/webserver/compo
 icons != find src/icons/* -type f
 buildicons := $(icons:src/icons/%=build/icons/%)
 
-.PHONY: clean build run templ tailwindcss configure complete
+.PHONY: clean build run templ tailwindcss configure complete docker
 
 build: build/css/stylesheet.css build/cmd/server $(buildsql) $(buildfonts) build/js/out.js $(buildicons) build/tls/cert.pem build/tls/key.pem 
 
@@ -95,3 +95,6 @@ tools/tailwindcss:
 complete:
 	make configure
 	make build
+
+docker:
+	sudo docker build . -t com.ethanrandolph.webserver
