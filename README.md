@@ -15,7 +15,7 @@ This is a personal portfolio web server that I wrote. I created this to show off
 Once the initial requirements are meant, clone this project with
 
     git clone https://github.com/ethanr555/PortfolioWebServer
-    cd PortfolioeWebServer
+    cd PortfolioWebServer
 
 Now, running CMake will setup the environment:
 
