@@ -1,4 +1,4 @@
-package main
+package datalayer
 
 import (
 	"context"

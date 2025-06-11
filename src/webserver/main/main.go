@@ -12,13 +12,14 @@ import (
 	"github.com/a-h/templ"
 	components_content "webserver.ethanrandolph.com/components/content"
 	components_core "webserver.ethanrandolph.com/components/core"
+	"webserver.ethanrandolph.com/datalayer"
 )
 
 type Application struct {
-	dl Datalayer
+	dl datalayer.Datalayer
 }
 
-func (app Application) CreateBase(content templ.Component, bio FetchBiographyResult) templ.Component {
+func (app Application) CreateBase(content templ.Component, bio datalayer.FetchBiographyResult) templ.Component {
 	header := components_core.Header(bio.Firstname, bio.Lastname, bio.PortaitLink)
 	footer := components_core.Footer(bio.ResumeLink, bio.Email, bio.Linkedinlink, bio.Githublink)
 	base := components_core.Base(header, content, footer)
@@ -96,10 +97,6 @@ func (app Application) careerPage(w http.ResponseWriter, r *http.Request) {
 	base.Render(r.Context(), w)
 }
 
-func (app Application) educationPage(w http.ResponseWriter, r *http.Request) {
-
-}
-
 func (app Application) projectSummariesPage(w http.ResponseWriter, r *http.Request) {
 
 	Bio := app.dl.FetchBio()
@@ -109,7 +106,7 @@ func (app Application) projectSummariesPage(w http.ResponseWriter, r *http.Reque
 	var topitems []templ.Component
 	var botitems []templ.Component
 	var i int
-	var summary FetchProjectSummaryResult
+	var summary datalayer.FetchProjectSummaryResult
 	for i, summary = range summaries {
 		if summary.IsCareer {
 			break
@@ -200,7 +197,7 @@ func (app Application) projectMediaJson(w http.ResponseWriter, r *http.Request) 
 func main() {
 	mux := http.NewServeMux()
 	app := Application{}
-	dl := Datalayer{}
+	dl := datalayer.Datalayer{}
 	dbip := flag.String("dbip", os.Getenv("PORTFOLIOSERVER_DBIP"), "Postgresql Database IP Address")
 	dbport := flag.String("dbport", os.Getenv("PORTFOLIOSERVER_DBPORT"), "Postgresql Database Port")
 	dbuser := flag.String("dbuser", os.Getenv("PORTFOLIOSERVER_DBUSER"), "Postgresql Database login username")
@@ -223,7 +220,6 @@ func main() {
 	mux.HandleFunc("/projects/{id}/media.json", app.projectMediaJson)
 	mux.HandleFunc("/career/{id}", app.careerPage)
 	mux.HandleFunc("/menu", app.menuPage)
-	//mux.HandleFunc("/education/{id}", app.educationPage)
 	fileServer := http.FileServer(http.Dir("../css/"))
 	fontServer := http.FileServer(http.Dir("../fonts/"))
 	jsServer := http.FileServer(http.Dir("../js/"))
