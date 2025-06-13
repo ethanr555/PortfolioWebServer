@@ -106,14 +106,17 @@ type FetchBiographyResult struct {
 	ResumeLink   string
 }
 
-func (dl *Datalayer) Init(path string, ip string, port string, databasename string, username string, password string) {
+func Init(path string, ip string, port string, databasename string, username string, password string) *Datalayer {
+	dl := &Datalayer{}
 	url := fmt.Sprintf("postgres://%s:%s@%s:%s/%s", username, password, ip, port, databasename)
 	conn, err := pgxpool.New(context.Background(), url)
 	if err != nil {
+
 		fmt.Println("Connection error!")
 	}
 	dl.pool = conn
 	dl.relativePath = path
+	return dl
 }
 
 func (dl *Datalayer) Close() {
@@ -145,7 +148,7 @@ func errMessQuery(funcName string) {
 	fmt.Printf("Query failed when executing function %s", funcName)
 }
 
-func (dl *Datalayer) FetchProject(projectid string) FetchProjectResult {
+func (dl *Datalayer) FetchProject(projectid string) (FetchProjectResult, error) {
 	var id *int
 	var name *string
 	var companyname *string
@@ -160,6 +163,7 @@ func (dl *Datalayer) FetchProject(projectid string) FetchProjectResult {
 	err := dl.pool.QueryRow(context.Background(), query, projectid).Scan(&id, &name, &companyname, &description, &reponame, &repolink, &sitename, &sitelink, &startyear, &endyear)
 	if err != nil {
 		errMessQuery("FetchProject")
+		return FetchProjectResult{}, err
 	}
 	result := FetchProjectResult{
 		Id:          resolveNil(id),
@@ -173,17 +177,18 @@ func (dl *Datalayer) FetchProject(projectid string) FetchProjectResult {
 		Startyear:   resolveNil(startyear),
 		Endyear:     resolveNil(endyear),
 	}
-	return result
+	return result, nil
 }
 
-func (dl *Datalayer) FetchProjectImages(projectid string) []FetchProjectImagesResult {
+func (dl *Datalayer) FetchProjectImages(projectid string) ([]FetchProjectImagesResult, error) {
 	var id *int
 	var imagelink *string
 	var imagethumbnaillink *string
 	query := getQueryFromPath("../sql/FetchProjectImages.sql")
 	rows, err := dl.pool.Query(context.Background(), query, projectid)
 	if err != nil {
-
+		errMessQuery("FetchProjectImages")
+		return []FetchProjectImagesResult{}, err
 	}
 	var results []FetchProjectImagesResult
 	pgx.ForEachRow(rows, []any{&id, &imagelink, &imagethumbnaillink}, func() error {
@@ -194,16 +199,17 @@ func (dl *Datalayer) FetchProjectImages(projectid string) []FetchProjectImagesRe
 		results = append(results, result)
 		return nil
 	})
-	return results
+	return results, nil
 }
 
-func (dl *Datalayer) FetchProjectVideos(projectid string) []FetchProjectVideosResult {
+func (dl *Datalayer) FetchProjectVideos(projectid string) ([]FetchProjectVideosResult, error) {
 	var id *int
 	var videoLink *string
 	query := getQueryFromPath("../sql/FetchProjectVideos.sql")
 	rows, err := dl.pool.Query(context.Background(), query, projectid)
 	if err != nil {
-
+		errMessQuery("FetchProjectVideos")
+		return []FetchProjectVideosResult{}, err
 	}
 	var results []FetchProjectVideosResult
 	pgx.ForEachRow(rows, []any{&id, &videoLink}, func() error {
@@ -213,17 +219,18 @@ func (dl *Datalayer) FetchProjectVideos(projectid string) []FetchProjectVideosRe
 		results = append(results, result)
 		return nil
 	})
-	return results
+	return results, nil
 
 }
 
-func (dl *Datalayer) FetchProjectTags(projectid int) []FetchProjectTagsResult {
+func (dl *Datalayer) FetchProjectTags(projectid int) ([]FetchProjectTagsResult, error) {
 	var id *int
 	var name *string
 	query := getQueryFromPath("../sql/FetchProjectTags.sql")
 	rows, err := dl.pool.Query(context.Background(), query, projectid)
 	if err != nil {
-
+		errMessQuery("FetchProjectTags")
+		return []FetchProjectTagsResult{}, err
 	}
 	var results []FetchProjectTagsResult
 	pgx.ForEachRow(rows, []any{&id, &name}, func() error {
@@ -233,18 +240,19 @@ func (dl *Datalayer) FetchProjectTags(projectid int) []FetchProjectTagsResult {
 		results = append(results, result)
 		return nil
 	})
-	return results
+	return results, nil
 
 }
 
-func (dl *Datalayer) FetchProjectTools(projectid string) []FetchProjectToolsResult {
+func (dl *Datalayer) FetchProjectTools(projectid string) ([]FetchProjectToolsResult, error) {
 
 	var id *int
 	var name *string
 	query := getQueryFromPath("../sql/FetchProjectTools.sql")
 	rows, err := dl.pool.Query(context.Background(), query, projectid)
 	if err != nil {
-
+		errMessQuery("FetchProjectTools")
+		return []FetchProjectToolsResult{}, err
 	}
 	var results []FetchProjectToolsResult
 	pgx.ForEachRow(rows, []any{&id, &name}, func() error {
@@ -254,10 +262,10 @@ func (dl *Datalayer) FetchProjectTools(projectid string) []FetchProjectToolsResu
 		results = append(results, result)
 		return nil
 	})
-	return results
+	return results, nil
 }
 
-func (dl *Datalayer) FetchCareer(careerid string) FetchCareerResult {
+func (dl *Datalayer) FetchCareer(careerid string) (FetchCareerResult, error) {
 
 	var id *int
 	var title *string
@@ -272,6 +280,7 @@ func (dl *Datalayer) FetchCareer(careerid string) FetchCareerResult {
 	err := dl.pool.QueryRow(context.Background(), query, careerid).Scan(&id, &title, &companyname, &description, &startmonth, &startyear, &endmonth, &endyear, &current)
 	if err != nil {
 		errMessQuery("FetchCareer")
+		return FetchCareerResult{}, err
 	}
 	result := FetchCareerResult{
 		Id:          resolveNil(id),
@@ -284,10 +293,10 @@ func (dl *Datalayer) FetchCareer(careerid string) FetchCareerResult {
 		Endyear:     resolveNil(endyear),
 		Current:     resolveNil(current),
 	}
-	return result
+	return result, nil
 }
 
-func (dl *Datalayer) FetchEducation() []FetchEducationResult {
+func (dl *Datalayer) FetchEducation() ([]FetchEducationResult, error) {
 	var name *string
 	var link *string
 	var title *string
@@ -299,7 +308,8 @@ func (dl *Datalayer) FetchEducation() []FetchEducationResult {
 
 	rows, err := dl.pool.Query(context.Background(), query)
 	if err != nil {
-		fmt.Println(err.Error())
+		errMessQuery("FetchEducation")
+		return []FetchEducationResult{}, err
 	}
 	var results []FetchEducationResult
 	pgx.ForEachRow(rows, []any{&name, &link, &title, &major, &gpa, &startdate, &enddate}, func() error {
@@ -316,23 +326,23 @@ func (dl *Datalayer) FetchEducation() []FetchEducationResult {
 		return nil
 	})
 	//fmt.Println(err.Error())
-	return results
+	return results, nil
 
 }
 
-func (dl *Datalayer) FetchAllProjects() []FetchProjectSummaryResult {
+func (dl *Datalayer) FetchAllProjects() ([]FetchProjectSummaryResult, error) {
 	return dl.FetchProjectSummaries(-1)
 }
 
-func (dl *Datalayer) FetchAllCareers() []FetchCareerSummariesResult {
+func (dl *Datalayer) FetchAllCareers() ([]FetchCareerSummariesResult, error) {
 	return dl.FetchCareerSummaries(-1)
 }
 
-func (dl *Datalayer) FetchAllEducation() []FetchEducationSummariesResult {
+func (dl *Datalayer) FetchAllEducation() ([]FetchEducationSummariesResult, error) {
 	return dl.FetchEducationSummaries(-1)
 }
 
-func (dl *Datalayer) FetchBio() FetchBiographyResult {
+func (dl *Datalayer) FetchBio() (FetchBiographyResult, error) {
 	var firstname *string
 	var lastname *string
 	var description *string
@@ -347,6 +357,7 @@ func (dl *Datalayer) FetchBio() FetchBiographyResult {
 		&email, &linkedinlink, &githublink, &websitelink, &portraitlink, &resumelink)
 	if err != nil {
 		errMessQuery("FetchBio")
+		return FetchBiographyResult{}, err
 	}
 	result := FetchBiographyResult{
 		Firstname:    resolveNil(firstname),
@@ -359,10 +370,10 @@ func (dl *Datalayer) FetchBio() FetchBiographyResult {
 		PortaitLink:  resolveNil(portraitlink),
 		ResumeLink:   resolveNil(resumelink),
 	}
-	return result
+	return result, nil
 }
 
-func (dl *Datalayer) FetchProjectSummaries(limit int) []FetchProjectSummaryResult {
+func (dl *Datalayer) FetchProjectSummaries(limit int) ([]FetchProjectSummaryResult, error) {
 	var id *int
 	var name *string
 	var thumbnaillink *string
@@ -376,7 +387,8 @@ func (dl *Datalayer) FetchProjectSummaries(limit int) []FetchProjectSummaryResul
 		rows, err = dl.pool.Query(context.Background(), query, limit)
 	}
 	if err != nil {
-
+		errMessQuery("FetchProjectSummaries")
+		return []FetchProjectSummaryResult{}, err
 	}
 	var results []FetchProjectSummaryResult
 	pgx.ForEachRow(rows, []any{&id, &name, &thumbnaillink, &description}, func() error {
@@ -390,9 +402,9 @@ func (dl *Datalayer) FetchProjectSummaries(limit int) []FetchProjectSummaryResul
 		return nil
 	})
 
-	return results
+	return results, nil
 }
-func (dl *Datalayer) FetchProjectSummariesExtra(limit int) []FetchProjectSummaryResult {
+func (dl *Datalayer) FetchProjectSummariesExtra(limit int) ([]FetchProjectSummaryResult, error) {
 	var id *int
 	var name *string
 	var thumbnaillink *string
@@ -408,7 +420,8 @@ func (dl *Datalayer) FetchProjectSummariesExtra(limit int) []FetchProjectSummary
 		rows, err = dl.pool.Query(context.Background(), query, limit)
 	}
 	if err != nil {
-
+		errMessQuery("FetchProjectSummariesExtra")
+		return []FetchProjectSummaryResult{}, err
 	}
 	var results []FetchProjectSummaryResult
 	pgx.ForEachRow(rows, []any{&id, &name, &thumbnaillink, &description, &endyear, &iscareer}, func() error {
@@ -424,10 +437,10 @@ func (dl *Datalayer) FetchProjectSummariesExtra(limit int) []FetchProjectSummary
 		return nil
 	})
 
-	return results
+	return results, nil
 }
 
-func (dl *Datalayer) FetchCareerSummaries(limit int) []FetchCareerSummariesResult {
+func (dl *Datalayer) FetchCareerSummaries(limit int) ([]FetchCareerSummariesResult, error) {
 
 	var id *string
 	var title *string
@@ -442,8 +455,8 @@ func (dl *Datalayer) FetchCareerSummaries(limit int) []FetchCareerSummariesResul
 		rows, err = dl.pool.Query(context.Background(), query, limit)
 	}
 	if err != nil {
-		fmt.Println("Query failed for Career Summaries")
-		fmt.Println(err.Error())
+		errMessQuery("FetchCareerSummaries")
+		return []FetchCareerSummariesResult{}, err
 	}
 	var results []FetchCareerSummariesResult
 	pgx.ForEachRow(rows, []any{&id, &title, &name, &description}, func() error {
@@ -458,10 +471,10 @@ func (dl *Datalayer) FetchCareerSummaries(limit int) []FetchCareerSummariesResul
 		return nil
 	})
 
-	return results
+	return results, nil
 }
 
-func (dl *Datalayer) FetchEducationSummaries(limit int) []FetchEducationSummariesResult {
+func (dl *Datalayer) FetchEducationSummaries(limit int) ([]FetchEducationSummariesResult, error) {
 
 	var title *string
 	var major *string
@@ -476,7 +489,8 @@ func (dl *Datalayer) FetchEducationSummaries(limit int) []FetchEducationSummarie
 		rows, err = dl.pool.Query(context.Background(), query, limit)
 	}
 	if err != nil {
-
+		errMessQuery("FetchEducationSummaries")
+		return []FetchEducationSummariesResult{}, err
 	}
 	var results []FetchEducationSummariesResult
 	pgx.ForEachRow(rows, []any{&title, &major, &startdate, &enddate}, func() error {
@@ -491,5 +505,5 @@ func (dl *Datalayer) FetchEducationSummaries(limit int) []FetchEducationSummarie
 		return nil
 	})
 
-	return results
+	return results, nil
 }
