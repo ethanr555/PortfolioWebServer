@@ -119,6 +119,14 @@ func Init(path string, ip string, port string, databasename string, username str
 	return dl
 }
 
+func (dl *Datalayer) DBConnectionTest() bool {
+	err := dl.pool.Ping(context.Background())
+	if err != nil {
+		fmt.Printf("%s\n", err.Error())
+		return false
+	}
+	return true
+}
 func (dl *Datalayer) Close() {
 	if dl.pool == nil {
 		fmt.Println("Error: Database connection does not exist and cannot be closed.")

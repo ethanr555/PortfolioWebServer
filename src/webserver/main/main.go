@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
 	"flag"
 	"fmt"
 	"net/http"
@@ -10,28 +11,44 @@ import (
 	"time"
 
 	"github.com/a-h/templ"
+	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgconn"
 	components_content "webserver.ethanrandolph.com/components/content"
 	components_core "webserver.ethanrandolph.com/components/core"
 	"webserver.ethanrandolph.com/datalayer"
 )
 
 type Application struct {
-	dl datalayer.Datalayer
+	dl *datalayer.Datalayer
 }
 
-func (app Application) CreateBase(content templ.Component, bio datalayer.FetchBiographyResult) templ.Component {
+func DBErrorHandle(err error, w http.ResponseWriter, r *http.Request) {
+	if err != nil {
+		if e := new(pgconn.ConnectError); errors.As(err, &e) {
+			w.WriteHeader(503)
+		} else if errors.Is(err, pgx.ErrNoRows) {
+			w.WriteHeader(404)
+		}
+	}
+}
+
+func (app *Application) CreateBase(content templ.Component, bio datalayer.FetchBiographyResult) templ.Component {
 	header := components_core.Header(bio.Firstname, bio.Lastname, bio.PortaitLink)
 	footer := components_core.Footer(bio.ResumeLink, bio.Email, bio.Linkedinlink, bio.Githublink)
 	base := components_core.Base(header, content, footer)
 	return base
 }
 
-func (app Application) home_page(w http.ResponseWriter, r *http.Request) {
+func (app *Application) home_page(w http.ResponseWriter, r *http.Request) {
 
-	Bio := app.dl.FetchBio()
-	proj_summaries := app.dl.FetchProjectSummaries(5)
-	car_summaries := app.dl.FetchCareerSummaries(3)
-	edu_summaries := app.dl.FetchEducationSummaries(3)
+	Bio, err := app.dl.FetchBio()
+	DBErrorHandle(err, w, r)
+	proj_summaries, err := app.dl.FetchProjectSummaries(5)
+	DBErrorHandle(err, w, r)
+	car_summaries, err := app.dl.FetchCareerSummaries(3)
+	DBErrorHandle(err, w, r)
+	edu_summaries, err := app.dl.FetchEducationSummaries(3)
+	DBErrorHandle(err, w, r)
 
 	//Create Bio snippet
 	biocomp := components_core.Biosnippet(Bio.Description)
@@ -59,18 +76,33 @@ func (app Application) home_page(w http.ResponseWriter, r *http.Request) {
 	base.Render(r.Context(), w)
 }
 
-func (app Application) projectPage(w http.ResponseWriter, r *http.Request) {
+func (app *Application) projectPage(w http.ResponseWriter, r *http.Request) {
 
-	Bio := app.dl.FetchBio()
+	Bio, err := app.dl.FetchBio()
+	if err != nil {
+		fmt.Printf("%s", err.Error())
+	}
 	id := r.PathValue("id")
-	project := app.dl.FetchProject(id)
-	projectimages := app.dl.FetchProjectImages(id)
-	projecttools := app.dl.FetchProjectTools(id)
+	project, err := app.dl.FetchProject(id)
+	if err != nil {
+		fmt.Printf("%s", err.Error())
+	}
+	projectimages, err := app.dl.FetchProjectImages(id)
+	if err != nil {
+		fmt.Printf("%s", err.Error())
+	}
+	projecttools, err := app.dl.FetchProjectTools(id)
+	if err != nil {
+		fmt.Printf("%s", err.Error())
+	}
 	var toolnames []string
 	for _, tool := range projecttools {
 		toolnames = append(toolnames, tool.Name)
 	}
-	projectvideos := app.dl.FetchProjectVideos(id)
+	projectvideos, err := app.dl.FetchProjectVideos(id)
+	if err != nil {
+		fmt.Printf("%s", err.Error())
+	}
 	var videos []string
 	var images []components_core.ImageInfo
 	for _, video := range projectvideos {
@@ -88,19 +120,31 @@ func (app Application) projectPage(w http.ResponseWriter, r *http.Request) {
 	base.Render(r.Context(), w)
 }
 
-func (app Application) careerPage(w http.ResponseWriter, r *http.Request) {
-	Bio := app.dl.FetchBio()
+func (app *Application) careerPage(w http.ResponseWriter, r *http.Request) {
+	Bio, err := app.dl.FetchBio()
+	if err != nil {
+		fmt.Printf("%s", err.Error())
+	}
 	id := r.PathValue("id")
-	career := app.dl.FetchCareer(id)
+	career, err := app.dl.FetchCareer(id)
+	if err != nil {
+		fmt.Printf("%s", err.Error())
+	}
 	page := components_content.Career(career.Title, career.Companyname, career.Description, fmt.Sprintf("%s %d - %s %d", career.Startmonth, career.Startyear, career.Endmonth, career.Endyear))
 	base := app.CreateBase(page, Bio)
 	base.Render(r.Context(), w)
 }
 
-func (app Application) projectSummariesPage(w http.ResponseWriter, r *http.Request) {
+func (app *Application) projectSummariesPage(w http.ResponseWriter, r *http.Request) {
 
-	Bio := app.dl.FetchBio()
-	summaries := app.dl.FetchProjectSummariesExtra(-1)
+	Bio, err := app.dl.FetchBio()
+	if err != nil {
+		fmt.Printf("%s", err.Error())
+	}
+	summaries, err := app.dl.FetchProjectSummariesExtra(-1)
+	if err != nil {
+		fmt.Printf("%s", err.Error())
+	}
 
 	//Finish
 	var topitems []templ.Component
@@ -124,10 +168,16 @@ func (app Application) projectSummariesPage(w http.ResponseWriter, r *http.Reque
 	base.Render(r.Context(), w)
 }
 
-func (app Application) careerSummariesPage(w http.ResponseWriter, r *http.Request) {
+func (app *Application) careerSummariesPage(w http.ResponseWriter, r *http.Request) {
 
-	Bio := app.dl.FetchBio()
-	summaries := app.dl.FetchCareerSummaries(-1)
+	Bio, err := app.dl.FetchBio()
+	if err != nil {
+		fmt.Printf("%s", err.Error())
+	}
+	summaries, err := app.dl.FetchCareerSummaries(-1)
+	if err != nil {
+		fmt.Printf("%s", err.Error())
+	}
 
 	//Finish
 	var items []templ.Component
@@ -141,9 +191,15 @@ func (app Application) careerSummariesPage(w http.ResponseWriter, r *http.Reques
 	base.Render(r.Context(), w)
 }
 
-func (app Application) educationSummariesPage(w http.ResponseWriter, r *http.Request) {
-	Bio := app.dl.FetchBio()
-	summaries := app.dl.FetchEducationSummaries(10)
+func (app *Application) educationSummariesPage(w http.ResponseWriter, r *http.Request) {
+	Bio, err := app.dl.FetchBio()
+	if err != nil {
+		fmt.Printf("%s", err.Error())
+	}
+	summaries, err := app.dl.FetchEducationSummaries(10)
+	if err != nil {
+		fmt.Printf("%s", err.Error())
+	}
 
 	//Finish
 	var items []templ.Component
@@ -158,8 +214,11 @@ func (app Application) educationSummariesPage(w http.ResponseWriter, r *http.Req
 
 }
 
-func (app Application) menuPage(w http.ResponseWriter, r *http.Request) {
-	Bio := app.dl.FetchBio()
+func (app *Application) menuPage(w http.ResponseWriter, r *http.Request) {
+	Bio, err := app.dl.FetchBio()
+	if err != nil {
+		fmt.Printf("%s", err.Error())
+	}
 
 	content := components_content.Categories()
 	base := app.CreateBase(content, Bio)
@@ -172,11 +231,17 @@ type mediaJsonPayload struct {
 	ThumbnailUrls []string
 }
 
-func (app Application) projectMediaJson(w http.ResponseWriter, r *http.Request) {
+func (app *Application) projectMediaJson(w http.ResponseWriter, r *http.Request) {
 	id := r.PathValue("id")
 	gopayload := mediaJsonPayload{}
-	videos := app.dl.FetchProjectVideos(id)
-	images := app.dl.FetchProjectImages(id)
+	videos, err := app.dl.FetchProjectVideos(id)
+	if err != nil {
+		fmt.Printf("%s", err.Error())
+	}
+	images, err := app.dl.FetchProjectImages(id)
+	if err != nil {
+		fmt.Printf("%s", err.Error())
+	}
 
 	for _, video := range videos {
 		gopayload.VideoUrls = append(gopayload.VideoUrls, video.VideoYoutubeID)
@@ -194,10 +259,28 @@ func (app Application) projectMediaJson(w http.ResponseWriter, r *http.Request) 
 	w.Write(payload)
 }
 
+func (app *Application) Layer1MiddleMan(w http.ResponseWriter, r *http.Request) {
+
+	isReachable := app.dl.DBConnectionTest()
+	if !isReachable {
+		errPage := components_core.ServiceUnavailable()
+		w.WriteHeader(503)
+		errPage.Render(r.Context(), w)
+	} else {
+		mux := http.NewServeMux()
+		mux.HandleFunc("/", app.home_page)
+		mux.HandleFunc("/projects", app.projectSummariesPage)
+		mux.HandleFunc("/careers", app.careerSummariesPage)
+		mux.HandleFunc("/education", app.educationSummariesPage)
+		mux.HandleFunc("/projects/{id}", app.projectPage)
+		mux.HandleFunc("/projects/{id}/media.json", app.projectMediaJson)
+		mux.HandleFunc("/career/{id}", app.careerPage)
+		mux.HandleFunc("/menu", app.menuPage)
+		mux.ServeHTTP(w, r)
+	}
+}
+
 func main() {
-	mux := http.NewServeMux()
-	app := Application{}
-	dl := datalayer.Datalayer{}
 	dbip := flag.String("dbip", os.Getenv("PORTFOLIOSERVER_DBIP"), "Postgresql Database IP Address")
 	dbport := flag.String("dbport", os.Getenv("PORTFOLIOSERVER_DBPORT"), "Postgresql Database Port")
 	dbuser := flag.String("dbuser", os.Getenv("PORTFOLIOSERVER_DBUSER"), "Postgresql Database login username")
@@ -210,24 +293,25 @@ func main() {
 	certpath := flag.String("cert", os.Getenv("PORTFOLIOSERVER_CERT"), "Portfolio Server Certification File")
 	keypath := flag.String("key", os.Getenv("PORTFOLIOSERVER_KEY"), "Portfolio Server Key File")
 	flag.Parse()
-	dl.Init("", *dbip, *dbport, *dbname, *dbuser, *dbpass)
+
+	app := Application{}
+	dl := datalayer.Init("", *dbip, *dbport, *dbname, *dbuser, *dbpass)
 	app.dl = dl
-	mux.HandleFunc("/", app.home_page)
-	mux.HandleFunc("/projects", app.projectSummariesPage)
-	mux.HandleFunc("/careers", app.careerSummariesPage)
-	mux.HandleFunc("/education", app.educationSummariesPage)
-	mux.HandleFunc("/projects/{id}", app.projectPage)
-	mux.HandleFunc("/projects/{id}/media.json", app.projectMediaJson)
-	mux.HandleFunc("/career/{id}", app.careerPage)
-	mux.HandleFunc("/menu", app.menuPage)
+
 	fileServer := http.FileServer(http.Dir("../css/"))
 	fontServer := http.FileServer(http.Dir("../fonts/"))
 	jsServer := http.FileServer(http.Dir("../js/"))
 	iconServer := http.FileServer(http.Dir("../icons/"))
+	// Create new http.ServeMux. If server is running, at minimum,
+	// handle basic file fetching routes that are not reliant on DB
+	mux := http.NewServeMux()
 	mux.Handle("GET /css/", http.StripPrefix("/css", fileServer))
 	mux.Handle("GET /fonts/", http.StripPrefix("/fonts", fontServer))
 	mux.Handle("GET /js/", http.StripPrefix("/js", jsServer))
 	mux.Handle("GET /icons/", http.StripPrefix("/icons", iconServer))
+	// Catch all pattern if none of the other patterns match. This
+	// will handle specific pages tied to DB results.
+	mux.HandleFunc("/", app.Layer1MiddleMan)
 
 	server := &http.Server{
 		Addr:         fmt.Sprintf(":%s", port),
