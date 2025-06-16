@@ -32,14 +32,17 @@ func DBErrorHandle(err error, w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (app *Application) CreateBase(content templ.Component, bio datalayer.FetchBiographyResult) templ.Component {
-	header := components_core.Header(bio.Firstname, bio.Lastname, bio.PortaitLink)
-	footer := components_core.Footer(bio.ResumeLink, bio.Email, bio.Linkedinlink, bio.Githublink)
-	base := components_core.Base(header, content, footer)
-	return base
+func (app *Application) ExecutePage(in func(http.ResponseWriter, *http.Request) (templ.Component, datalayer.FetchBiographyResult)) func(http.ResponseWriter, *http.Request) {
+
+	return func(w http.ResponseWriter, r *http.Request) {
+		content, bio := in(w, r)
+		header := components_core.Header(bio.Firstname, bio.Lastname, bio.PortaitLink)
+		footer := components_core.Footer(bio.ResumeLink, bio.Email, bio.Linkedinlink, bio.Githublink)
+		components_core.Base(header, content, footer).Render(r.Context(), w)
+	}
 }
 
-func (app *Application) home_page(w http.ResponseWriter, r *http.Request) {
+func (app *Application) home_page(w http.ResponseWriter, r *http.Request) (templ.Component, datalayer.FetchBiographyResult) {
 
 	Bio, err := app.dl.FetchBio()
 	DBErrorHandle(err, w, r)
@@ -71,27 +74,27 @@ func (app *Application) home_page(w http.ResponseWriter, r *http.Request) {
 	car_list := components_core.Summaryverticalcontainer(car_items)
 	edu_list := components_core.Summaryverticalcontainer(edu_items)
 
-	content := components_content.Home(biocomp, proj_list, car_list, edu_list)
-	base := app.CreateBase(content, Bio)
-	base.Render(r.Context(), w)
+	return components_content.Home(biocomp, proj_list, car_list, edu_list), Bio
 }
 
-func (app *Application) projectPage(w http.ResponseWriter, r *http.Request) {
+func (app *Application) projectPage(w http.ResponseWriter, r *http.Request) (templ.Component, datalayer.FetchBiographyResult) {
 
+	id := r.PathValue("id")
 	Bio, err := app.dl.FetchBio()
 	if err != nil {
 		fmt.Printf("%s", err.Error())
+		return components_content.NotFound(), datalayer.FetchBiographyResult{}
 	}
-	id := r.PathValue("id")
 	project, err := app.dl.FetchProject(id)
 	if err != nil {
 		fmt.Printf("%s", err.Error())
+		return components_content.NotFound(), Bio
 	}
-	projectimages, err := app.dl.FetchProjectImages(id)
+	projectimages, _ := app.dl.FetchProjectImages(id)
 	if err != nil {
 		fmt.Printf("%s", err.Error())
 	}
-	projecttools, err := app.dl.FetchProjectTools(id)
+	projecttools, _ := app.dl.FetchProjectTools(id)
 	if err != nil {
 		fmt.Printf("%s", err.Error())
 	}
@@ -99,7 +102,7 @@ func (app *Application) projectPage(w http.ResponseWriter, r *http.Request) {
 	for _, tool := range projecttools {
 		toolnames = append(toolnames, tool.Name)
 	}
-	projectvideos, err := app.dl.FetchProjectVideos(id)
+	projectvideos, _ := app.dl.FetchProjectVideos(id)
 	if err != nil {
 		fmt.Printf("%s", err.Error())
 	}
@@ -111,39 +114,38 @@ func (app *Application) projectPage(w http.ResponseWriter, r *http.Request) {
 	for _, image := range projectimages {
 		images = append(images, components_core.ImageInfo{ImageLink: image.Imagelink, ImageThumbnail: image.Imagethumbnaillink})
 	}
-
-	content := components_content.Project(project.Name, project.Repolink, project.Sitelink, project.Companyname,
+	return components_content.Project(project.Name, project.Repolink, project.Sitelink, project.Companyname,
 		"TODO", toolnames, fmt.Sprintf("%d - %d", project.Startyear, project.Endyear),
-		project.Description, images, videos)
-
-	base := app.CreateBase(content, Bio)
-	base.Render(r.Context(), w)
+		project.Description, images, videos), Bio
 }
 
-func (app *Application) careerPage(w http.ResponseWriter, r *http.Request) {
+func (app *Application) careerPage(w http.ResponseWriter, r *http.Request) (templ.Component, datalayer.FetchBiographyResult) {
 	Bio, err := app.dl.FetchBio()
 	if err != nil {
 		fmt.Printf("%s", err.Error())
+		return components_content.NotFound(), datalayer.FetchBiographyResult{}
 	}
 	id := r.PathValue("id")
 	career, err := app.dl.FetchCareer(id)
 	if err != nil {
-		fmt.Printf("%s", err.Error())
+		return components_content.NotFound(), Bio
 	}
-	page := components_content.Career(career.Title, career.Companyname, career.Description, fmt.Sprintf("%s %d - %s %d", career.Startmonth, career.Startyear, career.Endmonth, career.Endyear))
-	base := app.CreateBase(page, Bio)
-	base.Render(r.Context(), w)
+	return components_content.Career(career.Title, career.Companyname, career.Description,
+			fmt.Sprintf("%s %d - %s %d", career.Startmonth, career.Startyear, career.Endmonth, career.Endyear)),
+		Bio
 }
 
-func (app *Application) projectSummariesPage(w http.ResponseWriter, r *http.Request) {
+func (app *Application) projectSummariesPage(w http.ResponseWriter, r *http.Request) (templ.Component, datalayer.FetchBiographyResult) {
 
 	Bio, err := app.dl.FetchBio()
 	if err != nil {
 		fmt.Printf("%s", err.Error())
+		return components_content.NotFound(), datalayer.FetchBiographyResult{}
 	}
 	summaries, err := app.dl.FetchProjectSummariesExtra(-1)
 	if err != nil {
 		fmt.Printf("%s", err.Error())
+		return components_content.NotFound(), Bio
 	}
 
 	//Finish
@@ -163,20 +165,20 @@ func (app *Application) projectSummariesPage(w http.ResponseWriter, r *http.Requ
 		botitems = append(botitems, item)
 	}
 
-	content := components_content.Summarypage_split("Projects", "Click on any entry below for detailed information", "Career Projects", topitems, botitems)
-	base := app.CreateBase(content, Bio)
-	base.Render(r.Context(), w)
+	return components_content.Summarypage_split("Projects", "Click on any entry below for detailed information", "Career Projects", topitems, botitems), Bio
 }
 
-func (app *Application) careerSummariesPage(w http.ResponseWriter, r *http.Request) {
+func (app *Application) careerSummariesPage(w http.ResponseWriter, r *http.Request) (templ.Component, datalayer.FetchBiographyResult) {
 
 	Bio, err := app.dl.FetchBio()
 	if err != nil {
 		fmt.Printf("%s", err.Error())
+		return components_content.NotFound(), datalayer.FetchBiographyResult{}
 	}
 	summaries, err := app.dl.FetchCareerSummaries(-1)
 	if err != nil {
 		fmt.Printf("%s", err.Error())
+		return components_content.NotFound(), Bio
 	}
 
 	//Finish
@@ -186,19 +188,20 @@ func (app *Application) careerSummariesPage(w http.ResponseWriter, r *http.Reque
 		items = append(items, item)
 	}
 
-	content := components_content.Summarypage("Career", "Click on any entry below for detailed information", items)
-	base := app.CreateBase(content, Bio)
-	base.Render(r.Context(), w)
+	return components_content.Summarypage("Career", "Click on any entry below for detailed information", items), Bio
 }
 
-func (app *Application) educationSummariesPage(w http.ResponseWriter, r *http.Request) {
+func (app *Application) educationSummariesPage(w http.ResponseWriter, r *http.Request) (templ.Component, datalayer.FetchBiographyResult) {
+
 	Bio, err := app.dl.FetchBio()
 	if err != nil {
 		fmt.Printf("%s", err.Error())
+		return components_content.NotFound(), datalayer.FetchBiographyResult{}
 	}
 	summaries, err := app.dl.FetchEducationSummaries(10)
 	if err != nil {
 		fmt.Printf("%s", err.Error())
+		return components_content.NotFound(), Bio
 	}
 
 	//Finish
@@ -208,21 +211,17 @@ func (app *Application) educationSummariesPage(w http.ResponseWriter, r *http.Re
 		items = append(items, item)
 	}
 
-	content := components_content.Summarypage("Education", "", items)
-	base := app.CreateBase(content, Bio)
-	base.Render(r.Context(), w)
+	return components_content.Summarypage("Education", "", items), Bio
 
 }
 
-func (app *Application) menuPage(w http.ResponseWriter, r *http.Request) {
+func (app *Application) menuPage(w http.ResponseWriter, r *http.Request) (templ.Component, datalayer.FetchBiographyResult) {
 	Bio, err := app.dl.FetchBio()
 	if err != nil {
 		fmt.Printf("%s", err.Error())
 	}
 
-	content := components_content.Categories()
-	base := app.CreateBase(content, Bio)
-	base.Render(r.Context(), w)
+	return components_content.Categories(), Bio
 }
 
 type mediaJsonPayload struct {
@@ -267,15 +266,21 @@ func (app *Application) Layer1MiddleMan(w http.ResponseWriter, r *http.Request) 
 		w.WriteHeader(503)
 		errPage.Render(r.Context(), w)
 	} else {
+		//Create Page with ExecutePage wrapper function
 		mux := http.NewServeMux()
-		mux.HandleFunc("/", app.home_page)
-		mux.HandleFunc("/projects", app.projectSummariesPage)
-		mux.HandleFunc("/careers", app.careerSummariesPage)
-		mux.HandleFunc("/education", app.educationSummariesPage)
-		mux.HandleFunc("/projects/{id}", app.projectPage)
+		// Makes it less verbose below.
+		HandleFunc := func(pattern string, in func(http.ResponseWriter, *http.Request) (templ.Component, datalayer.FetchBiographyResult)) {
+			mux.HandleFunc(pattern, app.ExecutePage(in))
+		}
+		HandleFunc("/{$}", app.home_page)
+		HandleFunc("/projects", app.projectSummariesPage)
+		HandleFunc("/careers", app.careerSummariesPage)
+		HandleFunc("/education", app.educationSummariesPage)
+		HandleFunc("/projects/{id}", app.projectPage)
+		HandleFunc("/career/{id}", app.careerPage)
+		HandleFunc("/menu", app.menuPage)
+		HandleFunc("/", app.projectPage) // Dummy case, if the path is invalid, direct to an empty project page, which will return a not found page
 		mux.HandleFunc("/projects/{id}/media.json", app.projectMediaJson)
-		mux.HandleFunc("/career/{id}", app.careerPage)
-		mux.HandleFunc("/menu", app.menuPage)
 		mux.ServeHTTP(w, r)
 	}
 }
