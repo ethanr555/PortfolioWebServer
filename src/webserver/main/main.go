@@ -91,21 +91,12 @@ func (app *Application) projectPage(w http.ResponseWriter, r *http.Request) (tem
 		return components_content.NotFound(), Bio
 	}
 	projectimages, _ := app.dl.FetchProjectImages(id)
-	if err != nil {
-		fmt.Printf("%s", err.Error())
-	}
 	projecttools, _ := app.dl.FetchProjectTools(id)
-	if err != nil {
-		fmt.Printf("%s", err.Error())
-	}
 	var toolnames []string
 	for _, tool := range projecttools {
 		toolnames = append(toolnames, tool.Name)
 	}
 	projectvideos, _ := app.dl.FetchProjectVideos(id)
-	if err != nil {
-		fmt.Printf("%s", err.Error())
-	}
 	var videos []string
 	var images []components_core.ImageInfo
 	for _, video := range projectvideos {
