@@ -1,3 +1,9 @@
+/*
+Package datalayer is the intermediate layer between the database and the rest of the server.
+
+It maintains a connection with the database with PGX.
+It contains functions representing specific queries to the database, along with specific structs to capture the results of the queries.
+*/
 package datalayer
 
 import (
@@ -11,11 +17,14 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
+// Type Datalayer is the main struct representing the database connection and acts as the receiver for all the querying functions.
+// Do not create this directly, use Init() to create an initialized Datalayer
 type Datalayer struct {
 	pool         *pgxpool.Pool
 	relativePath string
 }
 
+// The result struct for FetchProject()
 type FetchProjectResult struct {
 	Id          int    //Project ID
 	Name        string //Project name
@@ -29,26 +38,32 @@ type FetchProjectResult struct {
 	Endyear     int    // Project End Year
 }
 
+// The result struct for FetchProjectImages()
 type FetchProjectImagesResult struct {
 	Id                 int    // Image ID
 	Imagelink          string // Full image link
 	Imagethumbnaillink string // Image thumbnail link
 }
+
+// The result struct for FetchProjectVideos()
 type FetchProjectVideosResult struct {
 	Id             int    // Video ID
 	VideoYoutubeID string // Video Youtube ID
 }
 
+// The result struct for FetchProjectTags()
 type FetchProjectTagsResult struct {
 	Id   int    // Tag ID
 	Name string // Tag Name
 }
 
+// The result struct for FetchProjectTools()
 type FetchProjectToolsResult struct {
 	Id   int    // Tool ID
 	Name string // Tool Name
 }
 
+// The result struct for FetchCareer()
 type FetchCareerResult struct {
 	Id          int
 	Title       string
@@ -61,6 +76,7 @@ type FetchCareerResult struct {
 	Current     bool
 }
 
+// The result struct for FetchEducation()
 type FetchEducationResult struct {
 	Name      string
 	Link      string
@@ -71,6 +87,7 @@ type FetchEducationResult struct {
 	Enddate   int
 }
 
+// The result struct for FetchProjectSummary()
 type FetchProjectSummaryResult struct {
 	Id            int
 	Name          string
@@ -80,6 +97,7 @@ type FetchProjectSummaryResult struct {
 	IsCareer      bool
 }
 
+// The result struct for FetchCareerSummaries()
 type FetchCareerSummariesResult struct {
 	Id          string
 	Title       string
@@ -87,6 +105,7 @@ type FetchCareerSummariesResult struct {
 	Description string
 }
 
+// The result struct for FetchEducationSummaries()
 type FetchEducationSummariesResult struct {
 	Title     string
 	Major     string
@@ -94,6 +113,7 @@ type FetchEducationSummariesResult struct {
 	EndDate   int
 }
 
+// The result struct for FetchBiography()
 type FetchBiographyResult struct {
 	Firstname    string
 	Lastname     string
@@ -106,6 +126,7 @@ type FetchBiographyResult struct {
 	ResumeLink   string
 }
 
+// This function properly creates a Datalayer struct with the provided parameters. Always create a Datalayer with this function.
 func Init(path string, ip string, port string, databasename string, username string, password string) *Datalayer {
 	dl := &Datalayer{}
 	url := fmt.Sprintf("postgres://%s:%s@%s:%s/%s", username, password, ip, port, databasename)
@@ -119,6 +140,7 @@ func Init(path string, ip string, port string, databasename string, username str
 	return dl
 }
 
+// Tests the connection established by the pgx.pool to ensure that it is still connected or is connected.
 func (dl *Datalayer) DBConnectionTest() bool {
 	err := dl.pool.Ping(context.Background())
 	if err != nil {
@@ -127,6 +149,8 @@ func (dl *Datalayer) DBConnectionTest() bool {
 	}
 	return true
 }
+
+// Closes the datalayer database connection
 func (dl *Datalayer) Close() {
 	if dl.pool == nil {
 		fmt.Println("Error: Database connection does not exist and cannot be closed.")
@@ -134,6 +158,7 @@ func (dl *Datalayer) Close() {
 	dl.pool.Close()
 }
 
+// Reads a query from the file specified at the path.
 func getQueryFromPath(path string) string {
 	data, err := os.ReadFile(path)
 	if err != nil {
@@ -143,6 +168,7 @@ func getQueryFromPath(path string) string {
 	return string(data)
 }
 
+// A catchall function that will return either the value of the pointer or the equivalent zeroed value.
 func resolveNil[T any](input *T) T {
 	if input == nil {
 		var empty T
@@ -152,10 +178,12 @@ func resolveNil[T any](input *T) T {
 	}
 }
 
+// Writes a redundant error message format witht he specified function name
 func errMessQuery(funcName string, err error) error {
 	return fmt.Errorf("datalayer: query failed when executing function: %s: %w", funcName, err)
 }
 
+// Query that fetches a project (excluding images, tools, tags, videos)
 func (dl *Datalayer) FetchProject(projectid string) (FetchProjectResult, error) {
 	var id *int
 	var name *string
@@ -187,6 +215,7 @@ func (dl *Datalayer) FetchProject(projectid string) (FetchProjectResult, error) 
 	return result, nil
 }
 
+// Query that fetches project images
 func (dl *Datalayer) FetchProjectImages(projectid string) ([]FetchProjectImagesResult, error) {
 	var id *int
 	var imagelink *string
@@ -209,6 +238,7 @@ func (dl *Datalayer) FetchProjectImages(projectid string) ([]FetchProjectImagesR
 	return results, nil
 }
 
+// Query that fetches project videos
 func (dl *Datalayer) FetchProjectVideos(projectid string) ([]FetchProjectVideosResult, error) {
 	var id *int
 	var videoLink *string
@@ -229,6 +259,7 @@ func (dl *Datalayer) FetchProjectVideos(projectid string) ([]FetchProjectVideosR
 
 }
 
+// Query that fetches project tags
 func (dl *Datalayer) FetchProjectTags(projectid int) ([]FetchProjectTagsResult, error) {
 	var id *int
 	var name *string
@@ -249,6 +280,7 @@ func (dl *Datalayer) FetchProjectTags(projectid int) ([]FetchProjectTagsResult, 
 
 }
 
+// Query that fetches project tools
 func (dl *Datalayer) FetchProjectTools(projectid string) ([]FetchProjectToolsResult, error) {
 
 	var id *int
@@ -269,6 +301,7 @@ func (dl *Datalayer) FetchProjectTools(projectid string) ([]FetchProjectToolsRes
 	return results, nil
 }
 
+// Query that fetches specific job information.
 func (dl *Datalayer) FetchCareer(careerid string) (FetchCareerResult, error) {
 
 	var id *int
@@ -299,6 +332,7 @@ func (dl *Datalayer) FetchCareer(careerid string) (FetchCareerResult, error) {
 	return result, nil
 }
 
+// Query that fetches education summaries.
 func (dl *Datalayer) FetchEducation() ([]FetchEducationResult, error) {
 	var name *string
 	var link *string
@@ -332,18 +366,22 @@ func (dl *Datalayer) FetchEducation() ([]FetchEducationResult, error) {
 
 }
 
+// Query that fetches summaries for all projects.
 func (dl *Datalayer) FetchAllProjects() ([]FetchProjectSummaryResult, error) {
 	return dl.FetchProjectSummaries(-1)
 }
 
+// Query that fetches summaries for all careers.
 func (dl *Datalayer) FetchAllCareers() ([]FetchCareerSummariesResult, error) {
 	return dl.FetchCareerSummaries(-1)
 }
 
+// Query that fetches summaries for all education (degrees).
 func (dl *Datalayer) FetchAllEducation() ([]FetchEducationSummariesResult, error) {
 	return dl.FetchEducationSummaries(-1)
 }
 
+// Query that fetches biographical information.
 func (dl *Datalayer) FetchBio() (FetchBiographyResult, error) {
 	var firstname *string
 	var lastname *string
@@ -374,6 +412,7 @@ func (dl *Datalayer) FetchBio() (FetchBiographyResult, error) {
 	return result, nil
 }
 
+// Query that fetches a specific amount of summaries of projects.
 func (dl *Datalayer) FetchProjectSummaries(limit int) ([]FetchProjectSummaryResult, error) {
 	var id *int
 	var name *string
@@ -404,6 +443,10 @@ func (dl *Datalayer) FetchProjectSummaries(limit int) ([]FetchProjectSummaryResu
 
 	return results, nil
 }
+
+// Query that fetches differently organized summaries of projects.
+//
+// It organizes by whether or not the project is tied to a career, with the ones not associated with one being first.
 func (dl *Datalayer) FetchProjectSummariesExtra(limit int) ([]FetchProjectSummaryResult, error) {
 	var id *int
 	var name *string
@@ -439,6 +482,7 @@ func (dl *Datalayer) FetchProjectSummariesExtra(limit int) ([]FetchProjectSummar
 	return results, nil
 }
 
+// Query that fetches a specific number of summaries of careers.
 func (dl *Datalayer) FetchCareerSummaries(limit int) ([]FetchCareerSummariesResult, error) {
 
 	var id *string
@@ -472,6 +516,7 @@ func (dl *Datalayer) FetchCareerSummaries(limit int) ([]FetchCareerSummariesResu
 	return results, nil
 }
 
+// Query that fetches a specific summaries of degrees.
 func (dl *Datalayer) FetchEducationSummaries(limit int) ([]FetchEducationSummariesResult, error) {
 
 	var title *string
