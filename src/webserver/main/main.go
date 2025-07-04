@@ -1,3 +1,21 @@
+/*
+Server creates a http server that hosts a portfolio, with data located in a postgresql database.
+
+Usage:
+
+server [arg1 option1] [arg2 option2] [...]
+
+Arguments:
+
+	-dbip: The address of the database host
+	-dbport: The port of the database host
+	-dbuser: The user of the database to access the data on behalf of the server
+	-dbpass: The password for the user of the database to access the data on behalf of the server
+	-dbname: The name of the database in the database host
+	-port: THe port that this server should bind to
+	-cert: The signed TLS certification file to use for a HTTPS connection
+	-key: The key for the TLS certification used for a HTTPS connection
+*/
 package main
 
 import (
@@ -18,10 +36,13 @@ import (
 	"webserver.ethanrandolph.com/datalayer"
 )
 
+// Application is the main struct that is used to persist state in the webserver.
+// It serves as a receiver to many of the functions in main and stores a datalayer.Datalayer.
 type Application struct {
 	dl *datalayer.Datalayer
 }
 
+// DBErrorHandle serves as a layer for error handling in main to write to the header proper http error codes
 func DBErrorHandle(err error, w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		if e := new(pgconn.ConnectError); errors.As(err, &e) {
@@ -32,6 +53,9 @@ func DBErrorHandle(err error, w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// ExecutePage will return a http handler function that will assemble a page based on the content provided from the parameter in.
+// This assembly is the header, content, and footer components of the page.
+// in is another function that may alter the response if necessary. Used in conjunction with other layers.
 func (app *Application) ExecutePage(in func(http.ResponseWriter, *http.Request) (templ.Component, datalayer.FetchBiographyResult)) func(http.ResponseWriter, *http.Request) {
 
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -42,6 +66,8 @@ func (app *Application) ExecutePage(in func(http.ResponseWriter, *http.Request) 
 	}
 }
 
+// home_page creates a home page templ component from Application data.
+// Takes a http.ResponseWriter and *http.request to write errors if necessary.
 func (app *Application) home_page(w http.ResponseWriter, r *http.Request) (templ.Component, datalayer.FetchBiographyResult) {
 
 	Bio, err := app.dl.FetchBio()
@@ -77,6 +103,8 @@ func (app *Application) home_page(w http.ResponseWriter, r *http.Request) (templ
 	return components_content.Home(biocomp, proj_list, car_list, edu_list), Bio
 }
 
+// projectPage creates a templ.Component project page with Application data.
+// Returns a templ.Component.
 func (app *Application) projectPage(w http.ResponseWriter, r *http.Request) (templ.Component, datalayer.FetchBiographyResult) {
 
 	id := r.PathValue("id")
@@ -110,6 +138,7 @@ func (app *Application) projectPage(w http.ResponseWriter, r *http.Request) (tem
 		project.Description, images, videos), Bio
 }
 
+// Creates a career page templ.component with Application data. Returns the templ.component.
 func (app *Application) careerPage(w http.ResponseWriter, r *http.Request) (templ.Component, datalayer.FetchBiographyResult) {
 	Bio, err := app.dl.FetchBio()
 	if err != nil {
@@ -126,6 +155,7 @@ func (app *Application) careerPage(w http.ResponseWriter, r *http.Request) (temp
 		Bio
 }
 
+// Creates a Project Summaries templ.component with Application data. Returns that templ.Component.
 func (app *Application) projectSummariesPage(w http.ResponseWriter, r *http.Request) (templ.Component, datalayer.FetchBiographyResult) {
 
 	Bio, err := app.dl.FetchBio()
@@ -159,6 +189,7 @@ func (app *Application) projectSummariesPage(w http.ResponseWriter, r *http.Requ
 	return components_content.Summarypage_split("Projects", "Click on any entry below for detailed information", "Career Projects", topitems, botitems), Bio
 }
 
+// Creates a Career Summaries templ.component with Application data. Returns that templ.Component.
 func (app *Application) careerSummariesPage(w http.ResponseWriter, r *http.Request) (templ.Component, datalayer.FetchBiographyResult) {
 
 	Bio, err := app.dl.FetchBio()
@@ -182,6 +213,7 @@ func (app *Application) careerSummariesPage(w http.ResponseWriter, r *http.Reque
 	return components_content.Summarypage("Career", "Click on any entry below for detailed information", items), Bio
 }
 
+// Creates a Education Summaries templ.component with Application data. Returns that templ.Component.
 func (app *Application) educationSummariesPage(w http.ResponseWriter, r *http.Request) (templ.Component, datalayer.FetchBiographyResult) {
 
 	Bio, err := app.dl.FetchBio()
@@ -206,6 +238,7 @@ func (app *Application) educationSummariesPage(w http.ResponseWriter, r *http.Re
 
 }
 
+// Creates a Menu templ.component with Application data. Returns that templ.Component.
 func (app *Application) menuPage(w http.ResponseWriter, r *http.Request) (templ.Component, datalayer.FetchBiographyResult) {
 	Bio, err := app.dl.FetchBio()
 	if err != nil {
@@ -215,12 +248,14 @@ func (app *Application) menuPage(w http.ResponseWriter, r *http.Request) (templ.
 	return components_content.Categories(), Bio
 }
 
+// Type mediaJsonPayload is a pre-marshaled JSON object that has URLs for Videos, Images, and Thumbnails for a project.
 type mediaJsonPayload struct {
 	VideoUrls     []string
 	ImageUrls     []string
 	ThumbnailUrls []string
 }
 
+// This writes to the ResponseWriter a json response utilizing mediaJsonPayload based on data in Application
 func (app *Application) projectMediaJson(w http.ResponseWriter, r *http.Request) {
 	id := r.PathValue("id")
 	gopayload := mediaJsonPayload{}
@@ -249,6 +284,8 @@ func (app *Application) projectMediaJson(w http.ResponseWriter, r *http.Request)
 	w.Write(payload)
 }
 
+// Layer1MiddleMan intercepts the response before further redirection.
+// If data cannot be accessed from Application that is necessary for the server webpages, then it will handled here.
 func (app *Application) Layer1MiddleMan(w http.ResponseWriter, r *http.Request) {
 
 	isReachable := app.dl.DBConnectionTest()
@@ -276,6 +313,7 @@ func (app *Application) Layer1MiddleMan(w http.ResponseWriter, r *http.Request) 
 	}
 }
 
+// main is the application start point. Handles command line flags and arguments, and initializes the server.
 func main() {
 	dbip := flag.String("dbip", os.Getenv("PORTFOLIOSERVER_DBIP"), "Postgresql Database IP Address")
 	dbport := flag.String("dbport", os.Getenv("PORTFOLIOSERVER_DBPORT"), "Postgresql Database Port")
