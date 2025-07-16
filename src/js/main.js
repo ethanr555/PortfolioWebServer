@@ -1,6 +1,7 @@
 
 // Do not include import statements, as those do not get pruned by minify
 
+// This will search for key elements in page to determine if certain javascript objects get created and rendered in the DOM.
 function main() {
     // Find if there is an element requesting this:
     potentialElement = document.getElementById("carousel")
