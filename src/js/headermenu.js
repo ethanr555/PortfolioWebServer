@@ -1,20 +1,22 @@
 
+// Creates a drop-down menu to display various webpage directories. Can be opened and closed with a click.
 class MobileNavMenu {
     constructor(id) {
         this.id = id
         this.isExpanded = false
         this.menuinstance = null
     }  
-   
+  
+    // This will remove the HTML elements and deleted the current menu instance object. 
     DestroyMenu() {
         if (this.menuinstance != null) {
             this.menuinstance.remove()
             this.menuinstance = null
             this.isExpanded = false
-            console.log("ran 2")
         }
     }
 
+    // This will create a new menu instance object and attach it to the DOM
     CreateMenu() {
         if (this.menuinstance != null) {
             this.DestroyMenu()
@@ -46,9 +48,9 @@ class MobileNavMenu {
         parentElement.appendChild(container)
         this.menuinstance = container
         this.isExpanded = true
-        console.log("ran")
     }
 
+    // This will toggle whether the menu is expanded or not.
     ToggleMenu() {
         if (!this.isExpanded) {
             this.CreateMenu()

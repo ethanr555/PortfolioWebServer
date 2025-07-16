@@ -2,6 +2,7 @@ package core
 
 import "fmt"
 
+// HTML nodes that form the footer of the standard page.
 templ Footer(resumelink string, email string, linkedinlink string, githublink string) {
     {{ emaillink := fmt.Sprintf("mailto:%s", email)}}
     <div class="bg-blue-500 flex justify-between pl-5 pr-5 lg:pl-40 lg:pr-40 pt-10 pb-10">
