@@ -2,6 +2,7 @@ package core
 
 import "fmt"
 
+// Component that acts as a entry for the summaryverticalcontainer, containing information about a career.
 templ Summarysnippet_career(ID string, Title string, Date string, Description string, charlimit int) {
     {{ ShortenedDesc := Description
     if len(Description) > charlimit {

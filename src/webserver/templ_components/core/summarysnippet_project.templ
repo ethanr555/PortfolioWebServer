@@ -2,6 +2,7 @@ package core
 
 import "fmt"
 
+// Component that acts as an entry for the summaryverticalcontainer component, containing information about a project.
 templ Summarysnippet_project(id string, Name string, Description string, ThumbnailLink string, charlimit int, largeimages bool) {
     {{ ShortenedDesc := Description
     if len(Description) > charlimit {
