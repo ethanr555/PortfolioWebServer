@@ -1,0 +1,38 @@
+name: Build Webserver
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+jobs:
+  Build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.24.4'
+      - run: make configure
+      - run: make build
+      - uses: actions/upload-artifact@v4
+        id: build-artifact
+        with: 
+          name: webserver
+          path: |
+            build/cmd
+            build/css
+            build/fonts
+            build/icons
+            build/js
+            build/sql
+          compression: 6
+          overwrite: true
+      - run: docker build -t portfoliowebserver .
+      - run: docker save -o docker.tar portfoliowebserver
+      - uses: actions/upload-artifact@v4
+        id: docker-artifact
+        with:
+          name: docker
+          path: docker.tar
+          compression: 6
+          overwrite: true

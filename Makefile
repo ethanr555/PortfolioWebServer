@@ -1,3 +1,4 @@
+SHELL = /bin/bash
 go != find src/webserver/ -name '*.go' -type f
 templgo != find src/webserver/templ_components/ -name '*.go' -type f
 buildtemplgo := $(templgo:src/webserver/templ_components/%.go=src/webserver/components/%.go)
@@ -36,7 +37,7 @@ tailwindcss:
 # In production, use proper certificates signed by an authority rather than the ones generated here.
 build/tls/cert.pem build/tls/key.pem: | build/cmd/server
 	mkdir -p $$(dirname $@)	
-	cd build/tls/ && go run /usr/local/go/src/crypto/tls/generate_cert.go --rsa-bits=2048 --host=127.0.0.1
+	cd build/tls/ && go run $(shell dirname $(shell type -P go))/../src/crypto/tls/generate_cert.go --rsa-bits=2048 --host=127.0.0.1
 
 # Generates Tailwindcss if Templ HTML has been updated, if the the input.css file has been updated, or if the javascript files have been updated.
 # Any of these three files could result in new TailwindCSS utility classes being added.
@@ -84,7 +85,8 @@ configure:
 	cd src/webserver/ && go mod download
 #	Install minify binary to GOPATH
 	go install github.com/tdewolff/minify/v2/cmd/minify@v2.23.5
-
+# 	Install Templ
+	go install github.com/a-h/templ/cmd/templ@v0.3.857
 # Install TailwindCSS-CLI standalone executable
 tools/tailwindcss:
 	mkdir -p tools
