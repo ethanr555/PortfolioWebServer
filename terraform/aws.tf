@@ -26,9 +26,11 @@ resource "aws_internet_gateway" "portfoliowebserver_gw" {
 
 data "aws_ami" "image" {
   most_recent = true
-
-  owners     = ["self"]
-  name_regex = "/^${var.ami-name}$/gm"
+  owners      = ["self"]
+  filter {
+    name   = "name"
+    values = [var.ami-name]
+  }
 }
 
 resource "aws_instance" "webserver" {
