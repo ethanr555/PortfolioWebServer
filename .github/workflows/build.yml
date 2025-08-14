@@ -47,7 +47,7 @@ jobs:
           version: ${{ env.PackerProductVersion }}
       - uses: actions/download-artifact@v5
         with:
-          name: docker.zip
+          name: docker
           path: /
       - env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWSACCESSKEYID }}
