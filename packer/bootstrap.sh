@@ -1,0 +1,51 @@
+#!/bin/bash
+
+# Presumed environment variables, ensure these are created in provisioner
+# SCRIPT_DBPASS
+# SCRIPT_DBUSER
+# SCRIPT_DBNAME
+# SCRIPT_DBROOTPASS
+# SCRIPT_DUMPPATH
+# SCRIPT_WEBSERVERDOCKERPATH
+
+DBPORT=5432
+
+# Add Docker's official GPG key:
+sudo apt-get update
+sudo apt-get install -y ca-certificates curl
+sudo install -m 0755 -d /etc/apt/keyrings
+sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
+sudo chmod a+r /etc/apt/keyrings/docker.asc
+
+# Add the repository to Apt sources:
+echo \
+  "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu \
+  $(. /etc/os-release && echo "${UBUNTU_CODENAME:-$VERSION_CODENAME}") stable" | \
+  sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+sudo apt-get update
+sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+
+# Upgrade system packages
+sudo apt upgrade -y
+
+# Get PostgreSQL docker image
+docker pull postgres
+# Setup data
+mkdir data
+CONTAINERID=$(docker run -d --restart=always -e POSTGRES_PASSWORD=$SCRIPT_DBROOTPASS -v /data:/var/lib/postgresql/data -p 5432:5432 postgres:latest)
+PGPASSWORD=$SCRIPT_DBROOTPASS psql --host=localhost -U postgres -X $SCRIPT_DBNAME < $SCRIPT_DUMPPATH
+rm $SCRIPT_DUMPPATH
+DBIP=$(docker inspect -f '{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}' $CONTAINERID)
+
+#Install Portfolio Webserver image
+docker import $SCRIPT_WEBSERVERDOCKERPATH
+
+docker run -d --restart=always -p 80:80 --mount \
+    -e PORTFOLIOSERVER_DBIP=$DPIP -e PORTFOLIOSERVER_DBUSER=$SCRIPT_DBUSER -e PORTFOLIOSERVER_DBPORT=5432 \
+    -e PORTFOLIOSERVER_DBPASS=$SCRIPT_DBPASS -e PORTFOLIOSERVER_DBNAME=$SCRIPT_DBNAME com.ethanrandolph.webserver 
+
+#Enable firewall, close off SSH
+ufw allow 80
+ufw enable
+
+#Connection should be terminated, ready to be saved as an AMI
