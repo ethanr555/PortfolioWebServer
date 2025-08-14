@@ -60,7 +60,7 @@ locals {
 
 resource "aws_acm_certificate" "portfoliowebserver_cert" {
   domain_name               = var.domain
-  subject_alternative_names = var.alternate-domains
+  subject_alternative_names = [var.alternate-domains]
   validation_method         = "DNS"
 
   lifecycle {

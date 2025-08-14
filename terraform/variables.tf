@@ -16,5 +16,5 @@ variable "external-zone-id" {
 }
 
 variable "alternate-domains" {
-  type = list(string)
+  type = string
 }
