@@ -65,8 +65,8 @@ jobs:
             -var DBPass=${{ secrets.DBPASS }} \
             -var DBUser=${{ secrets.DBUSER }} \
             -var DBRootPass=${{ secrets.DBROOTPASS }} \
-            -var DumpPath=../dump.sql \
-            -var WebServerDockerPath=../docker.tar \
+            -var DumpPath=/tmp/dump.sql \
+            -var WebServerDockerPath=/tmp/docker.tar \
             -var AWSAccountID=${{ secrets.AWSACCOUNTID }} .
       - run: |
           cd terraform

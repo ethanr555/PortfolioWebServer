@@ -30,6 +30,16 @@ build {
     "source.amazon-ebs.ubuntu"
   ]
 
+  provisioner "file" {
+    source      = "../docker.tar"
+    destination = "/tmp/docker.tar"
+  }
+
+  provisioner "file" {
+    source      = "../dump.sql"
+    destination = "/tmp/dump.sql"
+  }
+
   provisioner "shell" {
     script = "bootstrap.sh"
     environment_vars = [

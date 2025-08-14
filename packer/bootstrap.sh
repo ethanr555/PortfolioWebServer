@@ -29,23 +29,23 @@ sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plug
 sudo apt upgrade -y
 
 # Get PostgreSQL docker image
-docker pull postgres
+sudo docker pull postgres
 # Setup data
 mkdir data
-CONTAINERID=$(docker run -d --restart=always -e POSTGRES_PASSWORD=$SCRIPT_DBROOTPASS -v /data:/var/lib/postgresql/data -p 5432:5432 postgres:latest)
+CONTAINERID=$(sudo docker run -d --restart=always -e POSTGRES_PASSWORD=$SCRIPT_DBROOTPASS -v /data:/var/lib/postgresql/data -p 5432:5432 postgres:latest)
 PGPASSWORD=$SCRIPT_DBROOTPASS psql --host=localhost -U postgres -X $SCRIPT_DBNAME < $SCRIPT_DUMPPATH
 rm $SCRIPT_DUMPPATH
-DBIP=$(docker inspect -f '{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}' $CONTAINERID)
+DBIP=$(sudo docker inspect -f '{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}' $CONTAINERID)
 
 #Install Portfolio Webserver image
-docker import $SCRIPT_WEBSERVERDOCKERPATH
+sudo docker import $SCRIPT_WEBSERVERDOCKERPATH
 
-docker run -d --restart=always -p 80:80 --mount \
+sudo docker run -d --restart=always -p 80:80 \
     -e PORTFOLIOSERVER_DBIP=$DPIP -e PORTFOLIOSERVER_DBUSER=$SCRIPT_DBUSER -e PORTFOLIOSERVER_DBPORT=5432 \
-    -e PORTFOLIOSERVER_DBPASS=$SCRIPT_DBPASS -e PORTFOLIOSERVER_DBNAME=$SCRIPT_DBNAME com.ethanrandolph.webserver 
+    -e PORTFOLIOSERVER_DBPASS=$SCRIPT_DBPASS -e PORTFOLIOSERVER_DBNAME=$SCRIPT_DBNAME portfoliowebserver:latest 
 
 #Enable firewall, close off SSH
-ufw allow 80
-ufw enable
+sudo ufw allow 80
+sudo ufw enable
 
 #Connection should be terminated, ready to be saved as an AMI
