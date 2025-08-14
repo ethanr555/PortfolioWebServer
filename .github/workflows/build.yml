@@ -2,8 +2,6 @@ name: Build Webserver
 on:
   push:
     branches: [main]
-  pull_request:
-    branches: [main]
 jobs:
   Build:
     runs-on: ubuntu-latest
@@ -36,3 +34,53 @@ jobs:
           path: docker.tar
           compression: 6
           overwrite: true
+  Deploy:
+    runs-on: ubuntu-latest
+    needs: Build
+    env:
+      PackerProductVersion: "latest"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+      - uses: hashicorp/setup-packer@main
+        with:
+          version: ${{ env.PackerProductVersion }}
+      - uses: actions/download-artifact@v5
+        with:
+          name: docker.tar
+          path: /
+      - env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWSACCESSKEYID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWSSECRETACCESSKEY }}
+          AWS_DEFAULT_REGION: us-west-1
+        run: |
+          aws s3api get-object --bucket ${{ secrets.DUMPBUCKET }} --key ${{ secrets.DUMPKEY }} --outfile dump.sql
+      - run: |
+          cd packer
+          packer init .
+          export AWS_ACCESS_KEY_ID=${{ secrets.AWSACCESSKEYID }}
+          export AWS_SECRET_ACCESS_KEY=${{ secrets.AWSSECRETACCESSKEY }}
+          packer build -var ami-name=${{ vars.AMINAME }} \
+            -var DBName=${{ secrets.DBNAME }} \
+            -var DBPass=${{ secrets.DBPASS }} \
+            -var DBUser=${{ secrets.DBUSER }} \
+            -var DBRootPass=${{ secrets.DBROOTPASS }} \
+            -var DumpPath=../dump.sql \
+            -var WebServerDockerPath=../docker.tar \
+            -var AWSAccountID=${{ secrets.AWSACCOUNTID }} \
+            webserver.pkr.hcl
+      - run: |
+          cd terraform
+          terraform init
+          export AWS_ACCESS_KEY_ID=${{ secrets.AWSACCESSKEYID }}
+          export AWS_SECRET_ACCESS_KEY=${{ secrets.AWSSECRETACCESSKEY }}
+          terraform plan
+          terraform apply -auto-approve \
+            -var ami-name=${{ vars.AMINAME }} \
+            -var domain=${{ vars.DOMAIN }} \
+            -var external-zone-id=${{ secrets.HOSTEDZONEID }} \
+            -var alternate-domains=${{ vars.ALTDOMAINS }} \
+            -var backend_bucket=${{ secrets.BACKENDBUCKET }} \
+            -var backend_key=${{ secrets.BACKENDKEY }}
+       
+
