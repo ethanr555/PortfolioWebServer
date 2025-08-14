@@ -56,7 +56,6 @@ jobs:
         run: |
           aws s3api get-object --bucket ${{ secrets.DUMPBUCKET }} --key ${{ secrets.DUMPKEY }} dump.sql
       - run: |
-          unzip docker.zip
           cd packer
           packer init .
           export AWS_ACCESS_KEY_ID=${{ secrets.AWSACCESSKEYID }}
