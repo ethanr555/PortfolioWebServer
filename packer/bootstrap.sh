@@ -36,6 +36,7 @@ sudo docker pull postgres
 # Setup data
 mkdir data
 CONTAINERID=$(sudo docker run -d --restart=always -e POSTGRES_PASSWORD=$SCRIPT_DBROOTPASS -v $(realpath data):/var/lib/postgresql/data -p $DBPORT:5432 postgres:latest)
+sleep 10 # Give time for the postgres instance to finish booting.
 PGPASSWORD=$SCRIPT_DBROOTPASS psql --host=localhost -p $DBPORT -U postgres -f $SCRIPT_DUMPPATH
 rm $SCRIPT_DUMPPATH
 sudo apt-get remove -y postgresql-client
@@ -43,7 +44,7 @@ DBIP=$(sudo docker inspect -f '{{range.NetworkSettings.Networks}}{{.IPAddress}}{
 
 #Install Portfolio Webserver image
 echo "Installing PortfolioWebserver..."
-sudo docker import $SCRIPT_WEBSERVERDOCKERPATH portfoliowebserver:latest
+sudo docker load -i $SCRIPT_WEBSERVERDOCKERPATH
 
 sudo docker run -d --restart=always -p 80:80 -e PORTFOLIOSERVER_DBIP=$DPIP -e PORTFOLIOSERVER_DBUSER=$SCRIPT_DBUSER -e PORTFOLIOSERVER_DBPORT=5432 -e PORTFOLIOSERVER_DBPASS=$SCRIPT_DBPASS -e PORTFOLIOSERVER_DBNAME=$SCRIPT_DBNAME portfoliowebserver:latest 
 

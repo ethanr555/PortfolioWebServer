@@ -99,4 +99,4 @@ complete:
 	make build
 
 docker:
-	sudo docker build . -t com.ethanrandolph.webserver
+	sudo docker build -t com.ethanrandolph.webserver .
