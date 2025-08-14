@@ -34,7 +34,7 @@ data "aws_ami" "image" {
 resource "aws_instance" "webserver" {
   ami           = data.aws_ami.image
   subnet_id     = aws_subnet.private_sb.id
-  instance_type = "t4g.micro"
+  instance_type = "t3.micro"
 
   depends_on = [aws_internet_gateway.portfoliowebserver_gw]
 }

@@ -10,7 +10,7 @@ packer {
 
 source "amazon-ebs" "ubuntu" {
   ami_name      = var.ami-name
-  instance_type = "t4g.micro"
+  instance_type = "t3.micro"
   region        = "us-west-1"
   source_ami_filter {
     filters = {
