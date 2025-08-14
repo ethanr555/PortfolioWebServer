@@ -48,7 +48,7 @@ jobs:
       - uses: actions/download-artifact@v5
         with:
           name: docker
-          path: /
+          path: ./
       - env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWSACCESSKEYID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWSSECRETACCESSKEY }}
