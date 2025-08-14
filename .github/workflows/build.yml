@@ -72,16 +72,14 @@ jobs:
           cd terraform
           export AWS_ACCESS_KEY_ID=${{ secrets.AWSACCESSKEYID }}
           export AWS_SECRET_ACCESS_KEY=${{ secrets.AWSSECRETACCESSKEY }}
-          terraform init \
+          terraform init -input=false \
             -backend-config="bucket=${{ secrets.BACKENDBUCKET }}" \
             -backend-config="key=${{ secrets.BACKENDKEY }}" \
             -backend-config="region=us-west-1"
-          export AWS_ACCESS_KEY_ID=${{ secrets.AWSACCESSKEYID }}
-          export AWS_SECRET_ACCESS_KEY=${{ secrets.AWSSECRETACCESSKEY }}
-          terraform plan
-          terraform apply -auto-approve \
+          terraform plan -out=tfplan -input=false \
             -var ami-name=${{ vars.AMINAME }} \
             -var domain=${{ vars.DOMAIN }} \
             -var external-zone-id=${{ secrets.HOSTEDZONEID }} \
             -var alternate-domains=${{ vars.ALTDOMAINS }} \
+          terraform apply -input=false tfplan
 

@@ -8,7 +8,7 @@
 # SCRIPT_DUMPPATH
 # SCRIPT_WEBSERVERDOCKERPATH
 
-DBPORT=5432
+DBPORT=5433
 
 echo "Installing Docker..."
 # Add Docker's official GPG key:
@@ -35,8 +35,8 @@ sudo apt-get install -y postgresql-client
 sudo docker pull postgres
 # Setup data
 mkdir data
-CONTAINERID=$(sudo docker run -d --restart=always -e POSTGRES_PASSWORD=$SCRIPT_DBROOTPASS -v $(realpath data):/var/lib/postgresql/data -p 5432:5432 postgres:latest)
-PGPASSWORD=$SCRIPT_DBROOTPASS psql --host=localhost -U postgres -X $SCRIPT_DBNAME < $SCRIPT_DUMPPATH
+CONTAINERID=$(sudo docker run -d --restart=always -e POSTGRES_PASSWORD=$SCRIPT_DBROOTPASS -v $(realpath data):/var/lib/postgresql/data -p $DBPORT:5432 postgres:latest)
+PGPASSWORD=$SCRIPT_DBROOTPASS psql --host=localhost -p $DBPORT -U postgres -f $SCRIPT_DUMPPATH
 rm $SCRIPT_DUMPPATH
 sudo apt-get remove -y postgresql-client
 DBIP=$(sudo docker inspect -f '{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}' $CONTAINERID)
@@ -45,9 +45,7 @@ DBIP=$(sudo docker inspect -f '{{range.NetworkSettings.Networks}}{{.IPAddress}}{
 echo "Installing PortfolioWebserver..."
 sudo docker import $SCRIPT_WEBSERVERDOCKERPATH portfoliowebserver:latest
 
-sudo docker run -d --restart=always -p 80:80 \
-    -e PORTFOLIOSERVER_DBIP=$DPIP -e PORTFOLIOSERVER_DBUSER=$SCRIPT_DBUSER -e PORTFOLIOSERVER_DBPORT=5432 \
-    -e PORTFOLIOSERVER_DBPASS=$SCRIPT_DBPASS -e PORTFOLIOSERVER_DBNAME=$SCRIPT_DBNAME portfoliowebserver:latest 
+sudo docker run -d --restart=always -p 80:80 -e PORTFOLIOSERVER_DBIP=$DPIP -e PORTFOLIOSERVER_DBUSER=$SCRIPT_DBUSER -e PORTFOLIOSERVER_DBPORT=5432 -e PORTFOLIOSERVER_DBPASS=$SCRIPT_DBPASS -e PORTFOLIOSERVER_DBNAME=$SCRIPT_DBNAME portfoliowebserver:latest 
 
 echo "Setting up firewall..."
 #Enable firewall, close off SSH
