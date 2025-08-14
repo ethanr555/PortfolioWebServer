@@ -34,7 +34,7 @@ data "aws_ami" "image" {
 }
 
 resource "aws_instance" "webserver" {
-  ami           = data.aws_ami.image
+  ami           = data.aws_ami.image.id
   subnet_id     = aws_subnet.private_sb.id
   instance_type = "t3.micro"
 
