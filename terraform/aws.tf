@@ -40,7 +40,7 @@ resource "aws_network_acl" "nacl" {
 }
 
 resource "aws_security_group" "sg" {
-
+  vpc_id = aws_vpc.portfoliowebserver_VPC.id
   egress {
     protocol    = "tcp"
     cidr_blocks = ["172.20.0.0/16"]
