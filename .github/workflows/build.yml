@@ -80,6 +80,6 @@ jobs:
             -var ami-name=${{ vars.AMINAME }} \
             -var domain=${{ vars.DOMAIN }} \
             -var external-zone-id=${{ secrets.HOSTEDZONEID }} \
-            -var alternate-domains=${{ vars.ALTDOMAINS }} \
+            -var alternate-domains=${{ vars.ALTDOMAINS }}
           terraform apply -input=false tfplan
 
