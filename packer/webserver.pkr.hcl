@@ -14,9 +14,9 @@ source "amazon-ebs" "ubuntu" {
   region        = "us-west-1"
   source_ami_filter {
     filters = {
-      name             = "ubuntu/images/*ubuntu-jammy-22.04-amd64-server-*"
-      root-device-type = "ebs"
-      virtualization   = "hvm"
+      name                = "ubuntu/images/*ubuntu-jammy-22.04-amd64-server-*"
+      root-device-type    = "ebs"
+      virtualization-type = "hvm"
     }
     most_recent = true
     owners      = ["${var.AWSAccountID}"]
