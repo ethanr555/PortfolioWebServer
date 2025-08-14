@@ -54,7 +54,7 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWSSECRETACCESSKEY }}
           AWS_DEFAULT_REGION: us-west-1
         run: |
-          aws s3api get-object --bucket ${{ secrets.DUMPBUCKET }} --key ${{ secrets.DUMPKEY }} --outfile dump.sql
+          aws s3api get-object --bucket ${{ secrets.DUMPBUCKET }} --key ${{ secrets.DUMPKEY }} dump.sql
       - run: |
           unzip docker.zip
           cd packer
