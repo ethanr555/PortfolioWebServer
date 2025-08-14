@@ -31,7 +31,7 @@ build {
   ]
 
   provisioner "shell" {
-    script = bootstrap.sh
+    script = "bootstrap.sh"
     environment_vars = [
       "SCRIPT_DBPASS=${var.DBPass}",
       "SCRIPT_DBUSER=${var.DBUser}",
