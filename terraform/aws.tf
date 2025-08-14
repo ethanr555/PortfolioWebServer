@@ -19,6 +19,7 @@ resource "aws_vpc" "portfoliowebserver_VPC" {
 
 resource "aws_subnet" "private_sb" {
   vpc_id = aws_vpc.portfoliowebserver_VPC.id
+  cidr_block = "172.20.0.0/16"
 }
 
 resource "aws_internet_gateway" "portfoliowebserver_gw" {
