@@ -18,13 +18,3 @@ variable "external-zone-id" {
 variable "alternate-domains" {
   type = list(string)
 }
-
-variable "backend_bucket" {
-  type      = string
-  sensitive = true
-}
-
-variable "backend_key" {
-  type      = string
-  sensitive = true
-}

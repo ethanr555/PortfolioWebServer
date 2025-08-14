@@ -7,9 +7,9 @@ terraform {
   }
 
   backend "s3" {
-    bucket = var.backend_bucket
-    key    = var.backend_key
-    region = "us-west-1"
+    bucket = ""
+    key    = ""
+    region = ""
   }
 }
 

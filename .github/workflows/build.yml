@@ -26,7 +26,7 @@ jobs:
           compression: 6
           overwrite: true
       - run: docker build -t portfoliowebserver .
-      - run: docker save -o docker.tar portfoliowebserver
+      - run: docker save -o docker.tar portfoliowebserver:latest
       - uses: actions/upload-artifact@v4
         id: docker-artifact
         with:
@@ -70,7 +70,10 @@ jobs:
             -var AWSAccountID=${{ secrets.AWSACCOUNTID }} .
       - run: |
           cd terraform
-          terraform init
+          terraform init \
+            -backend-config="bucket=${{ secrets.BACKENDBUCKET }}" \
+            -backend-config="key=${{ secrets.BACKENDKEY }}" \
+            -backend-config="region=us-west-1"
           export AWS_ACCESS_KEY_ID=${{ secrets.AWSACCESSKEYID }}
           export AWS_SECRET_ACCESS_KEY=${{ secrets.AWSSECRETACCESSKEY }}
           terraform plan
@@ -79,7 +82,4 @@ jobs:
             -var domain=${{ vars.DOMAIN }} \
             -var external-zone-id=${{ secrets.HOSTEDZONEID }} \
             -var alternate-domains=${{ vars.ALTDOMAINS }} \
-            -var backend_bucket=${{ secrets.BACKENDBUCKET }} \
-            -var backend_key=${{ secrets.BACKENDKEY }}
-       
 
