@@ -67,8 +67,7 @@ jobs:
             -var DBRootPass=${{ secrets.DBROOTPASS }} \
             -var DumpPath=../dump.sql \
             -var WebServerDockerPath=../docker.tar \
-            -var AWSAccountID=${{ secrets.AWSACCOUNTID }} \
-            webserver.pkr.hcl
+            -var AWSAccountID=${{ secrets.AWSACCOUNTID }} .
       - run: |
           cd terraform
           terraform init
