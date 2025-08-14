@@ -14,6 +14,7 @@ terraform {
 }
 
 resource "aws_vpc" "portfoliowebserver_VPC" {
+  cidr_block = "172.20.0.0/16"
 }
 
 resource "aws_subnet" "private_sb" {
