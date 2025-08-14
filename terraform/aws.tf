@@ -17,9 +17,37 @@ resource "aws_vpc" "portfoliowebserver_VPC" {
   cidr_block = "172.20.0.0/16"
 }
 
+resource "aws_network_acl" "nacl" {
+  vpc_id =  aws_vpc.portfoliowebserver_VPC.id
+
+  egress {
+    protocol = "tcp"
+    rule_no = 100
+    action = "allow"
+    cidr_block = "172.20.0.0/16"
+    from_port = 1024
+    to_port = 65535
+  }
+
+  ingress {
+    protocol = "tcp"
+    rule_no = 200
+    action = "allow"
+    cidr_block = "0.0.0.0/0"
+    from_port = 80
+    to_port = 80
+  }
+}
+
 resource "aws_subnet" "private_sb" {
   vpc_id = aws_vpc.portfoliowebserver_VPC.id
   cidr_block = "172.20.0.0/16"
+  
+}
+
+resource "aws_network_acl_association" "association" {
+  subnet_id = aws_subnet.private_sb.id
+  network_acl_id = aws_network_acl.nacl.id
 }
 
 resource "aws_internet_gateway" "portfoliowebserver_gw" {
