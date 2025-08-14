@@ -43,7 +43,7 @@ resource "aws_security_group" "sg" {
   vpc_id = aws_vpc.portfoliowebserver_VPC.id
   egress {
     protocol    = "tcp"
-    cidr_blocks = ["172.20.0.0/16"]
+    cidr_blocks = ["0.0.0.0/0"]
     from_port   = 1024
     to_port     = 65535
   }
@@ -143,7 +143,7 @@ resource "aws_acm_certificate_validation" "portfoliowebserver_validated_cert" {
 resource "aws_cloudfront_distribution" "portfoliowebserver_cf" {
   origin {
     domain_name = aws_instance.webserver.private_dns
-    origin_id   = local.ec2_origin_id
+    origin_id   = aws_cloudfront_vpc_origin.portfoliowebserver_vpc_origin.id
   }
   default_cache_behavior {
     allowed_methods        = ["GET"]
