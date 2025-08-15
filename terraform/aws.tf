@@ -24,7 +24,7 @@ resource "aws_network_acl" "nacl" {
     protocol   = "tcp"
     rule_no    = 100
     action     = "allow"
-    cidr_block = "172.20.0.0/16"
+    cidr_block = "0.0.0.0/0"
     from_port  = 1024
     to_port    = 65535
   }
@@ -154,9 +154,8 @@ resource "aws_cloudfront_distribution" "portfoliowebserver_cf" {
     vpc_origin_config {
       vpc_origin_id = aws_cloudfront_vpc_origin.portfoliowebserver_vpc_origin.id
     }
-
   }
-
+  aliases = [var.domain, var.alternate-domains]
   default_cache_behavior {
     allowed_methods        = ["HEAD", "GET"]
     cached_methods         = ["HEAD", "GET"]
