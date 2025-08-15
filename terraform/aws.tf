@@ -141,7 +141,7 @@ resource "aws_cloudfront_distribution" "portfoliowebserver_cf" {
   origin {
     domain_name = aws_instance.webserver.private_dns
     origin_id   = aws_cloudfront_vpc_origin.portfoliowebserver_vpc_origin.id
-  
+
     vpc_origin_config {
       vpc_origin_id = aws_vpc.portfoliowebserver_VPC.id
     }
@@ -153,6 +153,12 @@ resource "aws_cloudfront_distribution" "portfoliowebserver_cf" {
     cached_methods         = ["GET"]
     target_origin_id       = aws_cloudfront_vpc_origin.portfoliowebserver_vpc_origin.id
     viewer_protocol_policy = "https-only"
+    forwarded_values {
+      query_string = false
+      cookies {
+        forward = "none"
+      }
+    }
   }
   restrictions {
     geo_restriction {
