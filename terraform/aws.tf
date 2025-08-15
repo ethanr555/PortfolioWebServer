@@ -106,6 +106,7 @@ resource "aws_cloudfront_vpc_origin" "portfoliowebserver_vpc_origin" {
 
 
 resource "aws_acm_certificate" "portfoliowebserver_cert" {
+  provider                  = aws.virginia
   domain_name               = var.domain
   subject_alternative_names = [var.alternate-domains]
   validation_method         = "DNS"
@@ -168,7 +169,7 @@ resource "aws_cloudfront_distribution" "portfoliowebserver_cf" {
   }
   viewer_certificate {
     acm_certificate_arn = aws_acm_certificate_validation.portfoliowebserver_validated_cert.certificate_arn
-    ssl_support_method = "sni-only"
+    ssl_support_method  = "sni-only"
   }
   enabled = true
 }
