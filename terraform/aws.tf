@@ -141,7 +141,13 @@ resource "aws_cloudfront_distribution" "portfoliowebserver_cf" {
   origin {
     domain_name = aws_instance.webserver.private_dns
     origin_id   = aws_cloudfront_vpc_origin.portfoliowebserver_vpc_origin.id
+  
+    vpc_origin_config {
+      vpc_origin_id = aws_vpc.portfoliowebserver_VPC.id
+    }
+
   }
+
   default_cache_behavior {
     allowed_methods        = ["GET"]
     cached_methods         = ["GET"]
