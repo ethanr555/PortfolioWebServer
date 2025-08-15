@@ -18,3 +18,7 @@ variable "external-zone-id" {
 variable "alternate-domains" {
   type = string
 }
+
+variable "vpc-origin-name" {
+  type = string
+}

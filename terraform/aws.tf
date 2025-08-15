@@ -92,7 +92,7 @@ resource "aws_instance" "webserver" {
 
 resource "aws_cloudfront_vpc_origin" "portfoliowebserver_vpc_origin" {
   vpc_origin_endpoint_config {
-    name                   = "portfoliowebserver-vpc-origin"
+    name                   = var.vpc-origin-name
     arn                    = aws_instance.webserver.arn
     http_port              = 80
     https_port             = 443
