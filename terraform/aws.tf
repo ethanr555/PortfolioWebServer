@@ -121,7 +121,7 @@ resource "aws_acm_certificate" "portfoliowebserver_cert" {
   }
 }
 
-resource "aws_route53_record" "records" {
+resource "aws_route53_record" "validation_record" {
   for_each = {
     for dvo in aws_acm_certificate.portfoliowebserver_cert.domain_validation_options : dvo.domain_name => {
       name   = dvo.resource_record_name
@@ -136,18 +136,12 @@ resource "aws_route53_record" "records" {
   ttl             = 60
   type            = each.value.type
   zone_id         = var.external-zone-id
-
-  alias {
-    name                   = aws_cloudfront_distribution.portfoliowebserver_cf.domain_name
-    zone_id                = aws_cloudfront_distribution.portfoliowebserver_cf.hosted_zone_id
-    evaluate_target_health = false
-  }
 }
 
 resource "aws_acm_certificate_validation" "portfoliowebserver_validated_cert" {
   provider                = aws.virginia
   certificate_arn         = aws_acm_certificate.portfoliowebserver_cert.arn
-  validation_record_fqdns = [for record in aws_route53_record.records : record.fqdn]
+  validation_record_fqdns = [for record in aws_route53_record.validation_record : record.fqdn]
 }
 
 resource "aws_cloudfront_distribution" "portfoliowebserver_cf" {
@@ -187,3 +181,27 @@ resource "aws_cloudfront_distribution" "portfoliowebserver_cf" {
   }
   enabled = true
 }
+
+resource "aws_route53_record" "portfoliowebserver_dns" {
+  type    = "A"
+  name    = ""
+  zone_id = var.external-zone-id
+
+  alias {
+    name                   = aws_cloudfront_distribution.portfoliowebserver_cf.domain_name
+    zone_id                = aws_cloudfront_distribution.portfoliowebserver_cf.hosted_zone_id
+    evaluate_target_health = false
+  }
+}
+resource "aws_route53_record" "portfoliowebserver_dns_www" {
+  type    = "A"
+  name    = "www"
+  zone_id = var.external-zone-id
+
+  alias {
+    name                   = aws_cloudfront_distribution.portfoliowebserver_cf.domain_name
+    zone_id                = aws_cloudfront_distribution.portfoliowebserver_cf.hosted_zone_id
+    evaluate_target_health = false
+  }
+}
+
