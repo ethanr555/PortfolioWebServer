@@ -134,6 +134,7 @@ resource "aws_route53_record" "validation_record" {
 }
 
 resource "aws_acm_certificate_validation" "portfoliowebserver_validated_cert" {
+  provider                = aws.virginia
   certificate_arn         = aws_acm_certificate.portfoliowebserver_cert.arn
   validation_record_fqdns = [for record in aws_route53_record.validation_record : record.fqdn]
 }
