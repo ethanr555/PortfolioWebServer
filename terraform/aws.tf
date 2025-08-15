@@ -104,9 +104,6 @@ resource "aws_cloudfront_vpc_origin" "portfoliowebserver_vpc_origin" {
   }
 }
 
-locals {
-  ec2_origin_id = "PortfolioWebserver-EC2-OriginID"
-}
 
 resource "aws_acm_certificate" "portfoliowebserver_cert" {
   domain_name               = var.domain
@@ -148,7 +145,7 @@ resource "aws_cloudfront_distribution" "portfoliowebserver_cf" {
   default_cache_behavior {
     allowed_methods        = ["GET"]
     cached_methods         = ["GET"]
-    target_origin_id       = aws_instance.webserver.id
+    target_origin_id       = aws_cloudfront_vpc_origin.portfoliowebserver_vpc_origin.id
     viewer_protocol_policy = "https-only"
   }
   restrictions {
