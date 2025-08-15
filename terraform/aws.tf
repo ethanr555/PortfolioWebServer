@@ -149,8 +149,8 @@ resource "aws_cloudfront_distribution" "portfoliowebserver_cf" {
   }
 
   default_cache_behavior {
-    allowed_methods        = ["GET"]
-    cached_methods         = ["GET"]
+    allowed_methods        = ["HEAD", "GET"]
+    cached_methods         = ["HEAD", "GET"]
     target_origin_id       = aws_cloudfront_vpc_origin.portfoliowebserver_vpc_origin.id
     viewer_protocol_policy = "https-only"
     forwarded_values {
