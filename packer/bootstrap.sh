@@ -48,7 +48,7 @@ sudo apt-get remove -y postgresql-client
 echo "Installing PortfolioWebserver..."
 sudo docker load -i $SCRIPT_WEBSERVERDOCKERPATH
 
-sudo docker run -d --restart=always --net net --ip 172.18.0.3 -p 80:80 -e PORTFOLIOSERVER_DBIP=172.17.0.2 -e PORTFOLIOSERVER_DBUSER=$SCRIPT_DBUSER -e PORTFOLIOSERVER_DBPORT=5432 -e PORTFOLIOSERVER_DBPASS=$SCRIPT_DBPASS -e PORTFOLIOSERVER_DBNAME=$SCRIPT_DBNAME portfoliowebserver:latest 
+sudo docker run -d --restart=always --net net --ip 172.18.0.3 -p 80:80 -e PORTFOLIOSERVER_DBIP=172.18.0.2 -e PORTFOLIOSERVER_DBUSER=$SCRIPT_DBUSER -e PORTFOLIOSERVER_DBPORT=5432 -e PORTFOLIOSERVER_DBPASS=$SCRIPT_DBPASS -e PORTFOLIOSERVER_DBNAME=$SCRIPT_DBNAME portfoliowebserver:latest 
 
 echo "Setting up firewall..."
 #Enable firewall, close off SSH
