@@ -105,6 +105,7 @@ resource "aws_cloudfront_vpc_origin" "portfoliowebserver_vpc_origin" {
 
   lifecycle {
     create_before_destroy = true
+    replace_triggered_by  = [aws_instance.webserver.id]
   }
 }
 
