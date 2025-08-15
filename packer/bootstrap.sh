@@ -30,7 +30,7 @@ sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plug
 sudo apt upgrade -y
 
 #Setup Docker Network
-sudo docker network create --subnet=172.17.0.0/16 net
+sudo docker network create --subnet=172.18.0.0/16 net
 
 echo "Installing Postgresql..."
 # Get PostgreSQL docker image
@@ -38,7 +38,7 @@ sudo apt-get install -y postgresql-client
 sudo docker pull postgres
 # Setup data
 mkdir data
-CONTAINERID=$(sudo docker run -d --restart=always --net net --ip 172.17.0.2 -e POSTGRES_PASSWORD=$SCRIPT_DBROOTPASS -v $(realpath data):/var/lib/postgresql/data -p $DBPORT:5432 postgres:latest)
+CONTAINERID=$(sudo docker run -d --restart=always --net net --ip 172.18.0.2 -e POSTGRES_PASSWORD=$SCRIPT_DBROOTPASS -v $(realpath data):/var/lib/postgresql/data -p $DBPORT:5432 postgres:latest)
 sleep 10 # Give time for the postgres instance to finish booting.
 PGPASSWORD=$SCRIPT_DBROOTPASS psql --host=localhost -p $DBPORT -U postgres -f $SCRIPT_DUMPPATH
 rm $SCRIPT_DUMPPATH
@@ -48,7 +48,7 @@ sudo apt-get remove -y postgresql-client
 echo "Installing PortfolioWebserver..."
 sudo docker load -i $SCRIPT_WEBSERVERDOCKERPATH
 
-sudo docker run -d --restart=always --net net --ip 172.17.0.3 -p 80:80 -e PORTFOLIOSERVER_DBIP=172.17.0.2 -e PORTFOLIOSERVER_DBUSER=$SCRIPT_DBUSER -e PORTFOLIOSERVER_DBPORT=5432 -e PORTFOLIOSERVER_DBPASS=$SCRIPT_DBPASS -e PORTFOLIOSERVER_DBNAME=$SCRIPT_DBNAME portfoliowebserver:latest 
+sudo docker run -d --restart=always --net net --ip 172.18.0.3 -p 80:80 -e PORTFOLIOSERVER_DBIP=172.17.0.2 -e PORTFOLIOSERVER_DBUSER=$SCRIPT_DBUSER -e PORTFOLIOSERVER_DBPORT=5432 -e PORTFOLIOSERVER_DBPASS=$SCRIPT_DBPASS -e PORTFOLIOSERVER_DBNAME=$SCRIPT_DBNAME portfoliowebserver:latest 
 
 echo "Setting up firewall..."
 #Enable firewall, close off SSH
