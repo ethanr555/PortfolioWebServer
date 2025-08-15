@@ -34,14 +34,13 @@ jobs:
           path: docker.tar
           compression: 6
           overwrite: true
-  Deploy:
+  Packer:
     runs-on: ubuntu-latest
     needs: Build
     env:
       PackerProductVersion: "latest"
     steps:
       - uses: actions/checkout@v4
-      - uses: hashicorp/setup-terraform@v3
       - uses: hashicorp/setup-packer@main
         with:
           version: ${{ env.PackerProductVersion }}
@@ -68,6 +67,12 @@ jobs:
             -var DumpPath=/tmp/dump.sql \
             -var WebServerDockerPath=/tmp/docker.tar \
             -var AWSAccountID=${{ secrets.AWSACCOUNTID }} .
+  Terraform:
+    runs-on: ubuntu-latest
+    needs: [Packer]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
       - run: |
           cd terraform
           export AWS_ACCESS_KEY_ID=${{ secrets.AWSACCESSKEYID }}
@@ -82,4 +87,5 @@ jobs:
             -var external-zone-id=${{ secrets.HOSTEDZONEID }} \
             -var alternate-domains=${{ vars.ALTDOMAIN }}
           terraform apply -input=false tfplan
+
 
