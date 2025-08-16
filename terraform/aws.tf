@@ -141,6 +141,9 @@ resource "aws_acm_certificate_validation" "portfoliowebserver_validated_cert" {
 resource "aws_cloudfront_distribution" "portfoliowebserver_cf" {
   price_class = "PriceClass_100"
 
+  lifecycle {
+    replace_triggered_by = [ aws_cloudfront_vpc_origin.portfoliowebserver_vpc_origin.id ]
+  }
   origin {
     domain_name = aws_instance.webserver.private_dns
     origin_id   = aws_cloudfront_vpc_origin.portfoliowebserver_vpc_origin.id
