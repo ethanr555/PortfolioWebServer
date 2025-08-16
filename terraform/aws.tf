@@ -37,6 +37,15 @@ resource "aws_network_acl" "nacl" {
     from_port  = 80
     to_port    = 80
   }
+
+  ingress {
+    protocol   = "tcp"
+    rule_no    = 200
+    action     = "allow"
+    cidr_block = "0.0.0.0/0"
+    from_port  = 1024
+    to_port    = 65535
+  }
 }
 
 resource "aws_security_group" "sg" {
@@ -141,9 +150,6 @@ resource "aws_acm_certificate_validation" "portfoliowebserver_validated_cert" {
 resource "aws_cloudfront_distribution" "portfoliowebserver_cf" {
   price_class = "PriceClass_100"
 
-  lifecycle {
-    replace_triggered_by = [ aws_cloudfront_vpc_origin.portfoliowebserver_vpc_origin.id ]
-  }
   origin {
     domain_name = aws_instance.webserver.private_dns
     origin_id   = aws_cloudfront_vpc_origin.portfoliowebserver_vpc_origin.id
