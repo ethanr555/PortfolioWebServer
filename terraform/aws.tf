@@ -87,7 +87,7 @@ resource "aws_instance" "webserver" {
   ami             = data.aws_ami.image.id
   subnet_id       = aws_subnet.private_sb.id
   security_groups = [aws_security_group.sg.id]
-  instance_type   = "t4g.nano"
+  instance_type   = "t3.nano"
 
   depends_on = [aws_internet_gateway.portfoliowebserver_gw]
 }

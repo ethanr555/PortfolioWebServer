@@ -10,11 +10,11 @@ packer {
 
 source "amazon-ebs" "ubuntu" {
   ami_name      = var.ami-name
-  instance_type = "t4g.nano"
+  instance_type = "t3.micro"
   region        = "us-west-1"
   source_ami_filter {
     filters = {
-      name                = "ubuntu/images/*ubuntu-noble-24.04-arm64-server-*"
+      name                = "ubuntu/images/*ubuntu-noble-24.04-amd64-server-*"
       root-device-type    = "ebs"
       virtualization-type = "hvm"
     }
