@@ -52,7 +52,7 @@ sudo docker run -d --restart=always --net net --ip 172.18.0.3 -p 80:80 -e PORTFO
 
 echo "Setting up firewall..."
 #Enable firewall, close off SSH
-sudo ufw allow 80
-sudo ufw --force enable
+# sudo ufw allow 80
+# sudo ufw --force enable
 
 #Connection should be terminated, ready to be saved as an AMI
