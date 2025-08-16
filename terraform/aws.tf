@@ -40,7 +40,7 @@ resource "aws_network_acl" "nacl" {
 
   ingress {
     protocol   = "tcp"
-    rule_no    = 200
+    rule_no    = 300
     action     = "allow"
     cidr_block = "0.0.0.0/0"
     from_port  = 1024
