@@ -39,7 +39,7 @@ sudo docker pull postgres
 # Setup data
 mkdir data
 CONTAINERID=$(sudo docker run -d --restart=always --net net --ip 172.18.0.2 -e POSTGRES_PASSWORD=$SCRIPT_DBROOTPASS -v $(realpath data):/var/lib/postgresql/data -p $DBPORT:5432 postgres:latest)
-sleep 10 # Give time for the postgres instance to finish booting.
+sleep 30 # Give time for the postgres instance to finish booting.
 PGPASSWORD=$SCRIPT_DBROOTPASS psql --host=localhost -p $DBPORT -U postgres -f $SCRIPT_DUMPPATH
 rm $SCRIPT_DUMPPATH
 sudo apt-get remove -y postgresql-client
